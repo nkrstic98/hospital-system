@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package authorization.v1;
+
+option go_package = "hospital-system/proto_gen/authorization/v1;authorization";
+
+service AuthorizationService {
+  rpc AddActor(AddActorRequest) returns (AddActorResponse);
+  rpc GetActor(GetActorRequest) returns (GetActorResponse);
+  rpc GetActors(GetActorsRequest) returns (GetActorsResponse);
+  rpc GetTeams(GetTeamsRequest) returns (GetTeamsResponse);
+  rpc AddResource(AddResourceRequest) returns (AddResourceResponse);
+  rpc GetResources(GetResourcesRequest) returns (GetResourcesResponse);
+  rpc ArchiveResource(ArchiveResourceRequest) returns (ArchiveResourceResponse);
+}
+
+message AddActorRequest {
+  string actor_id = 1;
+  string role = 2;
+  optional string team = 3;
+}
+
+message AddActorResponse {}
+
+message GetActorRequest {
+  string actor_id = 1;
+}
+
+message GetActorResponse {
+  Actor actor = 1;
+}
+
+message GetActorsRequest {}
+
+message GetActorsResponse {
+  repeated Actor actors = 1;
+}
+
+message GetTeamsRequest {}
+
+message GetTeamsResponse {
+  repeated Team teams = 1;
+}
+
+message AddResourceRequest {
+  string id = 1;
+  string team = 2;
+  string team_lead = 3;
+}
+
+message AddResourceResponse {}
+
+message GetResourcesRequest {
+  repeated string ids = 1;
+}
+
+message GetResourcesResponse {
+  repeated Resource resources = 1;
+}
+
+message ArchiveResourceRequest {
+  string id = 1;
+}
+
+message ArchiveResourceResponse {}
+
+message Team {
+  string name = 1;
+  string display_name = 2;
+  repeated Actor actors = 3;
+}
+
+message Actor {
+  string actor_id = 1;
+  string role = 2;
+  optional string team = 3;
+  repeated string permissions = 4;
+}
+
+message Resource {
+  string id = 1;
+  Team team = 2;
+  string team_lead = 3;
+}

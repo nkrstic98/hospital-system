@@ -1,0 +1,176 @@
+package user
+
+import (
+	"context"
+	"fmt"
+	"github.com/google/uuid"
+	"github.com/samber/lo"
+	"golang.org/x/exp/slog"
+	"hospital-system/proto_gen/authorization/v1"
+	"hospital-system/server/app/repositories/user"
+	"hospital-system/server/models"
+	"hospital-system/server/utils"
+)
+
+type ServiceImpl struct {
+	authorizationClient authorization.AuthorizationServiceClient
+	userRepo            user.Repository
+}
+
+func NewService(authorizationClient authorization.AuthorizationServiceClient, userRepo user.Repository) *ServiceImpl {
+	return &ServiceImpl{
+		authorizationClient: authorizationClient,
+		userRepo:            userRepo,
+	}
+}
+
+func (service *ServiceImpl) CreateUser(user User) (*uuid.UUID, error) {
+	id := uuid.New()
+
+	// Per default, password is equal to the national identification number and can be changed later
+	hashedPassword, err := utils.HashPassword(user.NationalIdentificationNumber)
+	if err != nil {
+		slog.Error(fmt.Sprintf("Failed to hash password: %v for user %s", err, user.Email))
+		return nil, err
+	}
+
+	if err = service.userRepo.Insert(models.User{
+		ID:                           id,
+		Firstname:                    user.Firstname,
+		Lastname:                     user.Lastname,
+		NationalIdentificationNumber: user.NationalIdentificationNumber,
+		// Per default, the username is the email, it can be changed later
+		Username:    user.Email,
+		Email:       user.Email,
+		Password:    hashedPassword,
+		JoiningDate: user.JoiningDate,
+	}); err != nil {
+		return nil, err
+	}
+
+	_, err = service.authorizationClient.AddActor(context.Background(), &authorization.AddActorRequest{
+		ActorId: id.String(),
+		Role:    user.Role,
+		Team:    user.Team,
+	})
+	if err != nil {
+		slog.Error(fmt.Sprintf("Failed to add user %v to authorization database: %v", id, err))
+
+		if err = service.userRepo.Delete(id); err != nil {
+			slog.Error(fmt.Sprintf("Failed to delete user %v: %v", id, err))
+			return nil, err
+		}
+
+		return nil, err
+	}
+
+	return &id, nil
+}
+
+func (service *ServiceImpl) GetUser(id uuid.UUID) (*User, error) {
+	user, err := service.userRepo.Get(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &User{
+		Firstname: user.Firstname,
+		Lastname:  user.Lastname,
+	}, nil
+}
+
+func (service *ServiceImpl) GetByUsername(username string) (*User, error) {
+	user, err := service.userRepo.GetByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	actorResponse, err := service.authorizationClient.GetActor(context.Background(), &authorization.GetActorRequest{
+		ActorId: user.ID.String(),
+	})
+	if err != nil {
+		slog.Error(fmt.Sprintf("Failed to get actor %v from authorization database: %v", user.ID, err))
+		return nil, err
+	}
+
+	return &User{
+		ID:                           user.ID,
+		Firstname:                    user.Firstname,
+		Lastname:                     user.Lastname,
+		NationalIdentificationNumber: user.NationalIdentificationNumber,
+		Username:                     user.Username,
+		Email:                        user.Email,
+		PhoneNumber:                  user.PhoneNumber,
+		MailingAddress:               user.MailingAddress,
+		City:                         user.City,
+		State:                        user.State,
+		Zip:                          user.Zip,
+		Gender:                       user.Gender,
+		Birthday:                     user.Birthday,
+		JoiningDate:                  user.JoiningDate,
+		Verified:                     user.Verified,
+		Archived:                     user.Archived,
+		Role:                         actorResponse.GetActor().Role,
+		Team:                         actorResponse.GetActor().Team,
+		Permissions:                  actorResponse.GetActor().Permissions,
+	}, nil
+}
+
+func (service *ServiceImpl) ValidateUserPassword(userId uuid.UUID, password string) (bool, error) {
+	user, err := service.userRepo.Get(userId)
+	if err != nil {
+		return false, err
+	}
+
+	return utils.CheckPasswordHash(password, user.Password), nil
+}
+
+func (service *ServiceImpl) GetUsers() ([]User, error) {
+	users, err := service.userRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	getActorsResponse, err := service.authorizationClient.GetActors(context.Background(), &authorization.GetActorsRequest{})
+	if err != nil {
+		slog.Error(fmt.Sprintf("Failed to get actors from authorization database: %v", err))
+		return nil, err
+	}
+
+	userList := make([]User, 0)
+	for _, user := range users {
+		actor, found := lo.Find(getActorsResponse.GetActors(), func(actor *authorization.Actor) bool {
+			return actor.ActorId == user.ID.String()
+		})
+		if !found {
+			slog.Error(fmt.Sprintf("Actor not found for user %v, there are inconsistencies between server and authorization dbs", user.ID))
+			return nil, fmt.Errorf("inconsistencies found between server and authorization databases")
+		}
+
+		newUser := User{
+			ID:                           user.ID,
+			Firstname:                    user.Firstname,
+			Lastname:                     user.Lastname,
+			NationalIdentificationNumber: user.NationalIdentificationNumber,
+			Username:                     user.Username,
+			Email:                        user.Email,
+			PhoneNumber:                  user.PhoneNumber,
+			MailingAddress:               user.MailingAddress,
+			City:                         user.City,
+			State:                        user.State,
+			Zip:                          user.Zip,
+			Gender:                       user.Gender,
+			Birthday:                     user.Birthday,
+			JoiningDate:                  user.JoiningDate,
+			Verified:                     user.Verified,
+			Archived:                     user.Archived,
+			Role:                         actor.Role,
+			Team:                         actor.Team,
+			Permissions:                  actor.Permissions,
+		}
+
+		userList = append(userList, newUser)
+	}
+
+	return userList, nil
+}
