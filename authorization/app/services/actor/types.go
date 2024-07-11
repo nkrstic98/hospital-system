@@ -6,5 +6,5 @@ type Actor struct {
 	ActorID     uuid.UUID
 	Role        string
 	Team        *string
-	Permissions []string
+	Permissions map[string]string
 }

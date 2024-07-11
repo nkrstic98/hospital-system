@@ -36,15 +36,6 @@ export class SessionService {
                 nationalIdentificationNumber: data.user.national_identification_number,
                 username: data.user.username,
                 email: data.user.email,
-                phoneNumber: data.user.phone_number,
-                mailingAddress: data.user.mailing_address,
-                city: data.user.city,
-                state: data.user.state,
-                zip: data.user.zip,
-                gender: data.user.gender,
-                birthday: data.user.birthday,
-                joiningDate: data.user.joining_date,
-                archived: data.user.archived,
                 role: data.user.role,
                 team: data.user.team,
                 permissions: data.user.permissions,
@@ -81,15 +72,6 @@ export class SessionService {
                 nationalIdentificationNumber: data.user.national_identification_number,
                 username: data.user.username,
                 email: data.user.email,
-                phoneNumber: data.user.phone_number,
-                mailingAddress: data.user.mailing_address,
-                city: data.user.city,
-                state: data.user.state,
-                zip: data.user.zip,
-                gender: data.user.gender,
-                birthday: data.user.birthday,
-                joiningDate: data.user.joining_date,
-                archived: data.user.archived,
                 role: data.user.role,
                 team: data.user.team,
                 permissions: data.user.permissions,
@@ -112,6 +94,8 @@ export class SessionService {
             if(!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 
             return true;
         } catch (error) {

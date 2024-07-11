@@ -10,8 +10,8 @@ type Actor struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	RoleID uint  `gorm:"type:uuid;not null"`
-	TeamID *uint `gorm:"type:uuid"`
+	RoleID string  `gorm:"type:string;not null"`
+	TeamID *string `gorm:"type:string"`
 
 	Resources []Resource `gorm:"foreignKey:TeamLead;references:id;constraint:OnDelete:SET NULL;"`
 }

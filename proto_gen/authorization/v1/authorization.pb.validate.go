@@ -1759,6 +1759,8 @@ func (m *Actor) validate(all bool) error {
 
 	// no validation rules for Role
 
+	// no validation rules for Permissions
+
 	if m.Team != nil {
 		// no validation rules for Team
 	}

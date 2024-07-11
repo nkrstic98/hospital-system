@@ -1,13 +1,18 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type Team struct {
-	gorm.Model
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	Name        string `gorm:"uniqueIndex;not null"`
-	DisplayName string `gorm:"uniqueIndex;not null"`
+	ID   string `gorm:"type:string;primaryKey"`
+	Name string `gorm:"uniqueIndex;not null"`
 
 	Actors    []Actor    `gorm:"foreignKey:TeamID;constraint:OnDelete:SET NULL;"`
-	Resources []Resource `gorm:"foreignKey:Team;references:name;constraint:OnDelete:SET NULL;"`
+	Resources []Resource `gorm:"foreignKey:Team;references:id;constraint:OnDelete:SET NULL;"`
 }

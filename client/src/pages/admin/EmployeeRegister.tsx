@@ -81,7 +81,7 @@ const teams: Map<string, string> = new Map([
     ["ONCOLOGY", "Oncology"],
     ["PSYCH", "Psychiatry"],
     ["UROLOGY", "Urology"],
-
+    ["RADIOLOGY", "Radiology"]
 ]);
 
 const EmployeeRegister = ()=> {
@@ -104,10 +104,21 @@ const EmployeeRegister = ()=> {
         updateFormField("team", team);
     }
 
+    const isValidEmail = (email: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        return emailRegex.test(email);
+    }
+
     const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         if (form.firstname === "" || form.lastname === "" || form.nationalIdentificationNumber === "" || form.email === "" || form.role === "" || form.team == "") {
+            setSubmitAttempted(true);
+            return;
+        }
+
+        if (!isValidEmail(form.email)) {
             setSubmitAttempted(true);
             return;
         }
@@ -203,8 +214,8 @@ const EmployeeRegister = ()=> {
                                     onChange={(e) => updateFormField("email", e.target.value)}
                                     required
                                     fullWidth
-                                    error={submitAttempted && form.email === ""}
-                                    helperText={submitAttempted && form.email === "" ? "This field is required" : ""}
+                                    error={submitAttempted && (form.email === ""  || !isValidEmail(form.email))}
+                                    helperText={submitAttempted && form.email === "" ? "This field is required" : !isValidEmail(form.email) ? "Invalid email address" : ""}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>

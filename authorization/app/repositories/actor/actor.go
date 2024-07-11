@@ -59,7 +59,7 @@ func (repo *RepositoryImpl) GetAll() ([]models.Actor, error) {
 	return actors, nil
 }
 
-func (repo *RepositoryImpl) GetByTeamID(teamID uint) ([]models.Actor, error) {
+func (repo *RepositoryImpl) GetByTeamID(teamID string) ([]models.Actor, error) {
 	var actors []models.Actor
 	result := repo.db.Where("team_id = ?", teamID).Find(&actors)
 	if result.Error != nil {

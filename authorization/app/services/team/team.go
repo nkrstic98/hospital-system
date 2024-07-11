@@ -19,19 +19,19 @@ func NewService(teamRepo team_repo.Repository, actorService actor.Service) *Serv
 }
 
 func (service *ServiceImpl) GetTeam(team string) (Team, error) {
-	result, err := service.teamRepo.GetByName(team)
+	result, err := service.teamRepo.Get(team)
 	if err != nil {
 		return Team{}, err
 	}
 
-	actors, err := service.actorService.GetActorsByTeamID(result.ID)
+	actors, err := service.actorService.GetActorsByTeamID(team)
 	if err != nil {
 		return Team{}, err
 	}
 
 	return Team{
-		Name:        result.Name,
-		DisplayName: result.DisplayName,
+		Name:        result.ID,
+		DisplayName: result.Name,
 		Actors: lo.Map(actors, func(a actor.Actor, _ int) actor.Actor {
 			return actor.Actor{
 				ActorID:     a.ActorID,
@@ -58,8 +58,8 @@ func (service *ServiceImpl) GetTeams() ([]Team, error) {
 		}
 
 		resultTeams = append(resultTeams, Team{
-			Name:        team.Name,
-			DisplayName: team.DisplayName,
+			Name:        team.ID,
+			DisplayName: team.Name,
 			Actors:      actors,
 		})
 	}

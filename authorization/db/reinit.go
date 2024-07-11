@@ -11,9 +11,7 @@ import (
 func ReinitDatabase() error {
 	err := DB.Migrator().DropTable(
 		&models.Actor{},
-		&models.RolePermission{},
 		&models.Role{},
-		&models.Permission{},
 		&models.Team{},
 		&models.Resource{},
 	)
@@ -24,7 +22,6 @@ func ReinitDatabase() error {
 	if err = DB.AutoMigrate(
 		&models.Actor{},
 		&models.Role{},
-		&models.Permission{},
 		&models.Team{},
 		&models.Resource{},
 	); err != nil {
@@ -35,8 +32,9 @@ func ReinitDatabase() error {
 	err = DB.Transaction(func(tx *gorm.DB) error {
 		// Per default, add ADMIN Role
 		adminRole := models.Role{
-			Name:        "ADMIN",
-			DisplayName: "Administrator",
+			ID:          "ADMIN",
+			Name:        "Administrator",
+			Permissions: []byte(`{"EMPLOYEES":"WRITE", "PATIENTS":"WRITE"}`),
 		}
 		result := tx.Create(&adminRole)
 		if result.Error != nil {

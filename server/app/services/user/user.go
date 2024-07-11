@@ -10,6 +10,7 @@ import (
 	"hospital-system/server/app/repositories/user"
 	"hospital-system/server/models"
 	"hospital-system/server/utils"
+	"strings"
 )
 
 type ServiceImpl struct {
@@ -34,16 +35,21 @@ func (service *ServiceImpl) CreateUser(user User) (*uuid.UUID, error) {
 		return nil, err
 	}
 
+	username, err := extractUsernameFromEmail(user.Email)
+	if err != nil {
+		slog.Error(fmt.Sprintf("Failed to extract username from email: %v for user %s", err, user.Email))
+		return nil, err
+	}
+
 	if err = service.userRepo.Insert(models.User{
 		ID:                           id,
 		Firstname:                    user.Firstname,
 		Lastname:                     user.Lastname,
 		NationalIdentificationNumber: user.NationalIdentificationNumber,
 		// Per default, the username is the email, it can be changed later
-		Username:    user.Email,
-		Email:       user.Email,
-		Password:    hashedPassword,
-		JoiningDate: user.JoiningDate,
+		Username: username,
+		Email:    user.Email,
+		Password: hashedPassword,
 	}); err != nil {
 		return nil, err
 	}
@@ -100,16 +106,6 @@ func (service *ServiceImpl) GetByUsername(username string) (*User, error) {
 		NationalIdentificationNumber: user.NationalIdentificationNumber,
 		Username:                     user.Username,
 		Email:                        user.Email,
-		PhoneNumber:                  user.PhoneNumber,
-		MailingAddress:               user.MailingAddress,
-		City:                         user.City,
-		State:                        user.State,
-		Zip:                          user.Zip,
-		Gender:                       user.Gender,
-		Birthday:                     user.Birthday,
-		JoiningDate:                  user.JoiningDate,
-		Verified:                     user.Verified,
-		Archived:                     user.Archived,
 		Role:                         actorResponse.GetActor().Role,
 		Team:                         actorResponse.GetActor().Team,
 		Permissions:                  actorResponse.GetActor().Permissions,
@@ -154,16 +150,6 @@ func (service *ServiceImpl) GetUsers() ([]User, error) {
 			NationalIdentificationNumber: user.NationalIdentificationNumber,
 			Username:                     user.Username,
 			Email:                        user.Email,
-			PhoneNumber:                  user.PhoneNumber,
-			MailingAddress:               user.MailingAddress,
-			City:                         user.City,
-			State:                        user.State,
-			Zip:                          user.Zip,
-			Gender:                       user.Gender,
-			Birthday:                     user.Birthday,
-			JoiningDate:                  user.JoiningDate,
-			Verified:                     user.Verified,
-			Archived:                     user.Archived,
 			Role:                         actor.Role,
 			Team:                         actor.Team,
 			Permissions:                  actor.Permissions,
@@ -173,4 +159,12 @@ func (service *ServiceImpl) GetUsers() ([]User, error) {
 	}
 
 	return userList, nil
+}
+
+func extractUsernameFromEmail(email string) (string, error) {
+	parts := strings.Split(email, "@")
+	if len(parts) != 2 {
+		return "", fmt.Errorf("invalid email format")
+	}
+	return parts[0], nil
 }

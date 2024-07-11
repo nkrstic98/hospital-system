@@ -74,7 +74,7 @@ message Actor {
   string actor_id = 1;
   string role = 2;
   optional string team = 3;
-  repeated string permissions = 4;
+  map<string, string> permissions = 4;
 }
 
 message Resource {

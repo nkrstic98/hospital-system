@@ -6,5 +6,5 @@ type Service interface {
 	AddActor(actor Actor) error
 	GetActor(id uuid.UUID) (Actor, error)
 	GetActors() ([]Actor, error)
-	GetActorsByTeamID(teamID uint) ([]Actor, error)
+	GetActorsByTeamID(teamID string) ([]Actor, error)
 }

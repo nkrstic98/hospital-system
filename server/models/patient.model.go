@@ -10,14 +10,12 @@ type Patient struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Firstname                    string    `gorm:"not null"`
-	Lastname                     string    `gorm:"not null"`
-	NationalIdentificationNumber string    `gorm:"not null;uniqueIndex"`
-	MedicalRecordNumber          string    `gorm:"not null;uniqueIndex"`
-	Email                        string    `gorm:"not null;uniqueIndex"`
-	PhoneNumber                  string    `gorm:"not null"`
-	Birthday                     time.Time `gorm:"not null"`
-	Gender                       string    `gorm:"not null"`
+	Firstname                    string `gorm:"not null"`
+	Lastname                     string `gorm:"not null"`
+	NationalIdentificationNumber string `gorm:"not null;uniqueIndex"`
+	MedicalRecordNumber          string `gorm:"not null;uniqueIndex"`
+	Email                        string `gorm:"not null;uniqueIndex"`
+	PhoneNumber                  string `gorm:"not null"`
 
 	Admissions []Admission `gorm:"foreignKey:PatientID;constraint:OnDelete:SET NULL;"`
 }

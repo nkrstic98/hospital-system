@@ -20,14 +20,12 @@ type AddUserResponse struct {
 }
 
 type AddPatientRequest struct {
-	Firstname                    string    `json:"firstname"`
-	Lastname                     string    `json:"lastname"`
-	NationalIdentificationNumber string    `json:"nationalIdentificationNumber"`
-	MedicalRecordNumber          string    `json:"medicalRecordNumber"`
-	Birthday                     time.Time `json:"birthday"`
-	Gender                       string    `json:"gender"`
-	Email                        string    `json:"email"`
-	PhoneNumber                  string    `json:"phoneNumber"`
+	Firstname                    string `json:"firstname"`
+	Lastname                     string `json:"lastname"`
+	NationalIdentificationNumber string `json:"nationalIdentificationNumber"`
+	MedicalRecordNumber          string `json:"medicalRecordNumber"`
+	Email                        string `json:"email"`
+	PhoneNumber                  string `json:"phoneNumber"`
 }
 
 type AdmitPatientRequest struct {

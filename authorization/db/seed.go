@@ -1,11 +1,49 @@
 package db
 
 import (
+	"encoding/json"
 	"fmt"
 	"golang.org/x/exp/slog"
 	"gorm.io/gorm"
 	"hospital-system/authorization/models"
 )
+
+var attendingPermissionsMap = map[string]string{
+	"PATIENTS:INFO":               "WRITE",
+	"PATIENTS:VITALS":             "WRITE",
+	"PATIENTS:DIAGNOSIS":          "WRITE",
+	"PATIENTS:TRANSFER":           "WRITE",
+	"PATIENTS:DISCHARGE":          "WRITE",
+	"PATIENTS:MEDICINE:PRESCRIBE": "WRITE",
+	"PATIENTS:MEDICINE:GIVE":      "WRITE",
+	"PATIENTS:LABS:ORDER":         "WRITE",
+	"PATIENTS:LABS:RESULT":        "WRITE",
+	"PATIENTS:IMAGING:ORDER":      "WRITE",
+	"PATIENTS:IMAGING:RESULT":     "WRITE",
+}
+
+var residentPermissionsMap = map[string]string{
+	"PATIENTS:INFO":           "READ",
+	"PATIENTS:VITALS":         "WRITE",
+	"PATIENTS:DIAGNOSIS":      "READ",
+	"PATIENTS:MEDICINE:GIVE":  "WRITE",
+	"PATIENTS:LABS:RESULT":    "READ",
+	"PATIENTS:IMAGING:RESULT": "READ",
+}
+
+var nursePermissionsMap = map[string]string{
+	"PATIENTS:INFO":          "READ",
+	"PATIENTS:VITALS":        "WRITE",
+	"PATIENTS:DIAGNOSIS":     "READ",
+	"PATIENTS:MEDICINE:GIVE": "WRITE",
+}
+
+var technicianPermissionsMap = map[string]string{
+	"PATIENTS:INFO":      "READ",
+	"PATIENTS:DIAGNOSIS": "READ",
+	"PATIENTS:LABS":      "WRITE",
+	"PATIENTS:IMAGING":   "WRITE",
+}
 
 func SeedDatabase() error {
 	if !(DB.Migrator().HasTable(&models.Role{}) && DB.Migrator().HasTable(&models.Team{})) {
@@ -13,74 +51,107 @@ func SeedDatabase() error {
 		return fmt.Errorf("database is not initialized")
 	}
 
-	err := DB.Transaction(func(tx *gorm.DB) error {
+	attendingPermissionsSerialized, err := json.Marshal(attendingPermissionsMap)
+	if err != nil {
+		slog.Error("Failed to serialize attending permissions")
+		return err
+	}
+
+	residentPermissionsSerialized, err := json.Marshal(residentPermissionsMap)
+	if err != nil {
+		slog.Error("Failed to serialize resident permissions")
+		return err
+	}
+
+	nursePermissionsSerialized, err := json.Marshal(nursePermissionsMap)
+	if err != nil {
+		slog.Error("Failed to serialize nurse permissions")
+		return err
+	}
+
+	technicianPermissionsSerialized, err := json.Marshal(technicianPermissionsMap)
+	if err != nil {
+		slog.Error("Failed to serialize technician permissions")
+		return err
+	}
+
+	if err = DB.Transaction(func(tx *gorm.DB) error {
 		// Add predefined roles
-		result := tx.Create([]models.Role{
+		if err = tx.Create([]models.Role{
 			{
-				Name:        "ATTENDING",
-				DisplayName: "Attending Physician",
+				ID:          "ATTENDING",
+				Name:        "Attending Physician",
+				Permissions: attendingPermissionsSerialized,
 			},
 			{
-				Name:        "RESIDENT",
-				DisplayName: "Resident Doctor",
+				ID:          "RESIDENT",
+				Name:        "Resident Doctor",
+				Permissions: residentPermissionsSerialized,
 			},
 			{
-				Name:        "NURSE",
-				DisplayName: "Nurse",
+				ID:          "NURSE",
+				Name:        "Nurse",
+				Permissions: nursePermissionsSerialized,
 			},
 			{
-				Name:        "TECHNICIAN",
-				DisplayName: "Technician",
+				ID:          "TECHNICIAN",
+				Name:        "Technician",
+				Permissions: technicianPermissionsSerialized,
 			},
-		})
-		if result.Error != nil {
-			slog.Error(fmt.Sprintf("Failed to create predefined roles: %s", result.Error.Error()))
-			return result.Error
+		}).Error; err != nil {
+			slog.Error(fmt.Sprintf("Failed to create predefined roles: %s", err.Error()))
+			return err
 		}
 
 		// Add predefined teams
-		result = tx.Create([]models.Team{
+		if err = tx.Create([]models.Team{
 			{
-				Name:        "GENERAL",
-				DisplayName: "Internal Medicine",
+				ID:   "GENERAL",
+				Name: "Internal Medicine",
 			},
 			{
-				Name:        "CARDIO",
-				DisplayName: "Cardiology",
+				ID:   "CARDIO",
+				Name: "Cardiology",
 			},
 			{
-				Name:        "NEURO",
-				DisplayName: "Neurology",
+				ID:   "NEURO",
+				Name: "Neurology",
 			},
 			{
-				Name:        "ORTHO",
-				DisplayName: "Orthopedics",
+				ID:   "ORTHO",
+				Name: "Orthopedics",
 			},
 			{
-				Name:        "OB-GYN",
-				DisplayName: "Obstetrics and Gynecology",
+				ID:   "OB-GYN",
+				Name: "Obstetrics and Gynecology",
 			},
 			{
-				Name:        "PEDS",
-				DisplayName: "Pediatrics",
+				ID:   "PEDS",
+				Name: "Pediatrics",
 			},
 			{
-				Name:        "ONCOLOGY",
-				DisplayName: "Oncology",
+				ID:   "ONCOLOGY",
+				Name: "Oncology",
 			},
 			{
-				Name:        "PSYCH",
-				DisplayName: "Psychiatry",
+				ID:   "PSYCH",
+				Name: "Psychiatry",
 			},
 			{
-				Name:        "UROLOGY",
-				DisplayName: "Urology",
+				ID:   "UROLOGY",
+				Name: "Urology",
 			},
-		})
+			{
+				ID:   "RADIOLOGY",
+				Name: "Radiology",
+			},
+		}).Error; err != nil {
+			slog.Error(fmt.Sprintf("Failed to create predefined teams: %s", err.Error()))
+			return err
+		}
 
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		slog.Error("Failed to seed the database")
 		return err
 	}

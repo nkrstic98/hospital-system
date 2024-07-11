@@ -38,8 +38,6 @@ func (service *ServiceImpl) CreatePatient(patient Patient) (*Patient, error) {
 		MedicalRecordNumber:          patient.MedicalRecordNumber,
 		Email:                        patient.Email,
 		PhoneNumber:                  patient.PhoneNumber,
-		Birthday:                     patient.Birthday,
-		Gender:                       patient.Gender,
 	})
 	if err != nil {
 		return nil, err
@@ -53,8 +51,6 @@ func (service *ServiceImpl) CreatePatient(patient Patient) (*Patient, error) {
 		MedicalRecordNumber:          patientResponse.MedicalRecordNumber,
 		Email:                        patientResponse.Email,
 		PhoneNumber:                  patientResponse.PhoneNumber,
-		Birthday:                     patientResponse.Birthday,
-		Gender:                       patientResponse.Gender,
 		Admissions:                   nil,
 	}, nil
 }
@@ -81,8 +77,6 @@ func (service *ServiceImpl) GetPatient(id string) (*Patient, error) {
 		MedicalRecordNumber:          patient.MedicalRecordNumber,
 		Email:                        patient.Email,
 		PhoneNumber:                  patient.PhoneNumber,
-		Birthday:                     patient.Birthday,
-		Gender:                       patient.Gender,
 		Admissions: lo.Map(admissions, func(admission models.Admission, _ int) Admission {
 			return Admission{
 				ID:        admission.ID,

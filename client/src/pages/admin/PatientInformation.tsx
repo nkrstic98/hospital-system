@@ -53,18 +53,6 @@ const PatientInformation = ({ patient }: PatientInformationProps) => {
                         <Grid item xs={8}>
                             <p>{patient.email}</p>
                         </Grid>
-                        <Grid item xs={3}>
-                            <p><b>Birthday: </b></p>
-                        </Grid>
-                        <Grid item xs={8}>
-                            <p>{new Date(patient.birthday).toLocaleDateString()}</p>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <p><b>Gender: </b></p>
-                        </Grid>
-                        <Grid item xs={8}>
-                            <p>{patient.gender}</p>
-                        </Grid>
                     </Grid>
                     <Typography variant="h6" gutterBottom component="div" sx={{m: 4}}>
                         Past visits

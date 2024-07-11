@@ -13,8 +13,6 @@ type Patient struct {
 	MedicalRecordNumber          string    `json:"medicalRecordNumber"`
 	Email                        string    `json:"email"`
 	PhoneNumber                  string    `json:"phoneNumber"`
-	Birthday                     time.Time `json:"birthday"`
-	Gender                       string    `json:"gender"`
 
 	Admissions []Admission `json:"admissions"`
 }

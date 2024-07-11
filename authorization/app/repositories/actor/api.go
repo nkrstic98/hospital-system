@@ -9,5 +9,5 @@ type Repository interface {
 	Insert(actor models.Actor) error
 	Get(id uuid.UUID) (models.Actor, error)
 	GetAll() ([]models.Actor, error)
-	GetByTeamID(teamID uint) ([]models.Actor, error)
+	GetByTeamID(teamID string) ([]models.Actor, error)
 }

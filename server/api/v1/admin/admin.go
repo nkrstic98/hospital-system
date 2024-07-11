@@ -37,7 +37,6 @@ func (handler *HandlerImpl) AddUser(c *gin.Context) {
 		Lastname:                     addUserRequest.Lastname,
 		NationalIdentificationNumber: addUserRequest.NationalIdentificationNumber,
 		Email:                        addUserRequest.Email,
-		JoiningDate:                  addUserRequest.JoiningDate,
 		Role:                         addUserRequest.Role,
 		Team:                         addUserRequest.Team,
 	})
@@ -83,8 +82,6 @@ func (handler *HandlerImpl) AddPatient(c *gin.Context) {
 		Lastname:                     addPatientRequest.Lastname,
 		NationalIdentificationNumber: addPatientRequest.NationalIdentificationNumber,
 		MedicalRecordNumber:          addPatientRequest.MedicalRecordNumber,
-		Birthday:                     addPatientRequest.Birthday,
-		Gender:                       addPatientRequest.Gender,
 		Email:                        addPatientRequest.Email,
 		PhoneNumber:                  addPatientRequest.PhoneNumber,
 	})

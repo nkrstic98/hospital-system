@@ -30,19 +30,9 @@ func (repo *RepositoryImpl) Insert(team models.Team) error {
 	return nil
 }
 
-func (repo *RepositoryImpl) Get(id uint) (models.Team, error) {
+func (repo *RepositoryImpl) Get(id string) (models.Team, error) {
 	var team models.Team
 	result := repo.db.Where("id = ?", id).First(&team)
-	if result.Error != nil {
-		return models.Team{}, result.Error
-	}
-
-	return team, nil
-}
-
-func (repo *RepositoryImpl) GetByName(name string) (models.Team, error) {
-	var team models.Team
-	result := repo.db.Where("name = ?", name).First(&team)
 	if result.Error != nil {
 		return models.Team{}, result.Error
 	}

@@ -94,7 +94,7 @@ func (repo *RepositoryImpl) GetByIDs(ids []uuid.UUID) ([]models.User, error) {
 func (repo *RepositoryImpl) GetAll() ([]models.User, error) {
 	var users []models.User
 	if err := repo.db.Transaction(func(tx *gorm.DB) error {
-		result := repo.db.Find(&users)
+		result := repo.db.Order("username ASC").Find(&users)
 		if result.Error != nil {
 			slog.Error(fmt.Sprintf("Failed to get all users: %s", result.Error.Error()))
 			return result.Error

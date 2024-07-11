@@ -74,20 +74,6 @@ const PatientRegister = ({ form, updateFormField, userRegisterAttempted }: Patie
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <TextField
-                            id="birthday"
-                            name="birthday"
-                            type="text"
-                            label="Birthday"
-                            value={form.birthday}
-                            onChange={(e) => updateFormField("birthday", e.target.value)}
-                            required
-                            fullWidth
-                            error={userRegisterAttempted && form.birthday === ""}
-                            helperText={userRegisterAttempted && form.birthday === "" ? "This field is required" : ""}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <TextField
                             id="phoneNumber"
                             name="phoneNumber"
                             type="text"
@@ -108,17 +94,6 @@ const PatientRegister = ({ form, updateFormField, userRegisterAttempted }: Patie
                             label="Email Address"
                             value={form.email}
                             onChange={(e) => updateFormField("email", e.target.value)}
-                            fullWidth
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <TextField
-                            id="gender"
-                            name="gender"
-                            type="text"
-                            label="Gender"
-                            value={form.gender}
-                            onChange={(e) => updateFormField("gender", e.target.value)}
                             fullWidth
                         />
                     </Grid>

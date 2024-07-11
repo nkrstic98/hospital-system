@@ -16,14 +16,4 @@ type User struct {
 	Username                     string `gorm:"not null;uniqueIndex"`
 	Email                        string `gorm:"not null;uniqueIndex"`
 	Password                     string `gorm:"not null"`
-	PhoneNumber                  string
-	MailingAddress               string
-	City                         string
-	State                        string
-	Zip                          string
-	Gender                       string
-	Birthday                     time.Time
-	JoiningDate                  time.Time `gorm:"not null"`
-	Verified                     bool      `gorm:"default:false"`
-	Archived                     *bool
 }

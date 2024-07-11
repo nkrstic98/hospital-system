@@ -26,15 +26,6 @@ export interface UserResponse {
     national_identification_number: string;
     username: string;
     email: string;
-    phone_number: string;
-    mailing_address: string;
-    city: string;
-    state: string;
-    zip: string;
-    gender: string;
-    birthday: Date;
-    joining_date: Date;
-    archived: string;
     role:        string;
     team:        string | null;
     permissions: Array<string> | null;

@@ -23,7 +23,7 @@ import {useNavigate} from "react-router-dom";
 import {DepartmentService} from "../../services/department/Department.ts";
 
 const style = {
-    position: 'absolute' as 'absolute',
+    position: 'absolute' as const,
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
@@ -44,11 +44,9 @@ export type RegisterPatientFormFields = {
     medicalRecordNumber: string;
     email: string;
     phoneNumber: string;
-    birthday: string;
-    gender: string;
 }
 
-const registerPatientForm = () => {
+const useRegisterPatientForm = () => {
     const [form, setForm] = useState<RegisterPatientFormFields>({
         firstname: "",
         lastname: "",
@@ -56,8 +54,6 @@ const registerPatientForm = () => {
         medicalRecordNumber: "",
         email: "",
         phoneNumber: "",
-        birthday: "",
-        gender: "",
     });
 
     const clearField = (fieldName: string) => {
@@ -82,8 +78,6 @@ const registerPatientForm = () => {
             medicalRecordNumber: "",
             email: "",
             phoneNumber: "",
-            birthday: "",
-            gender: "",
         });
     }
 
@@ -102,7 +96,7 @@ export default function PatientAdmissionStepper() {
 
     const [patientAdmitted, setPatientAdmitted] = useState(false);
 
-    const { form, updateFormField, resetForm } = registerPatientForm();
+    const { form, updateFormField, resetForm } = useRegisterPatientForm();
     const [userRegisterAttempted, setUserRegisterAttempted] = useState(false);
     const [patientRegisterError, setPatientRegisterError] = useState(false);
 
@@ -136,7 +130,7 @@ export default function PatientAdmissionStepper() {
     };
 
     const handleNext = () => {
-        let as = activeStep;
+        const as = activeStep;
 
         let newSkipped = skipped;
         if (isStepSkipped(activeStep)) {
@@ -231,7 +225,7 @@ export default function PatientAdmissionStepper() {
                     <PatientRegister
                         form={form}
                         updateFormField={updateFormField}
-                        userRegisterAttempted={userRegisterAttempted}/>;
+                        userRegisterAttempted={userRegisterAttempted}/>
                 </>;
             case 2:
                 return <PatientSymptoms patientSymptoms={patientSymptoms} setPatientSymptoms={setPatientSymptoms}
@@ -319,9 +313,7 @@ export default function PatientAdmissionStepper() {
             form.nationalIdentificationNumber == "" ||
             form.medicalRecordNumber == "" ||
             form.email == "" ||
-            form.phoneNumber == "" ||
-            form.birthday == "" ||
-            form.gender == "") {
+            form.phoneNumber == "") {
             setUserRegisterAttempted(true);
             return;
         }
@@ -334,8 +326,6 @@ export default function PatientAdmissionStepper() {
             medicalRecordNumber: form.medicalRecordNumber,
             email: form.email,
             phoneNumber: form.phoneNumber,
-            birthday: new Date(),
-            gender: form.gender,
         }).then(r => {
             if (!r) {
                 setPatientRegisterError(true);

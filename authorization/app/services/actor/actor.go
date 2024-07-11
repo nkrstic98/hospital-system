@@ -1,6 +1,8 @@
 package actor
 
 import (
+	"encoding/json"
+
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"golang.org/x/exp/slog"
@@ -25,26 +27,10 @@ func NewService(actorRepo actor.Repository, roleRepo role.Repository, teamRepo t
 }
 
 func (service *ServiceImpl) AddActor(actor Actor) error {
-	role, err := service.roleRepo.GetByName(actor.Role)
-	if err != nil {
-		slog.Error("Error fetching role: ", err)
-		return err
-	}
-
-	var teamID *uint
-	if actor.Team != nil {
-		team, err := service.teamRepo.GetByName(*actor.Team)
-		if err != nil {
-			slog.Error("Error fetching team: ", err)
-			return err
-		}
-		teamID = &team.ID
-	}
-
-	if err = service.actorRepo.Insert(models.Actor{
+	if err := service.actorRepo.Insert(models.Actor{
 		ID:     actor.ActorID,
-		RoleID: role.ID,
-		TeamID: teamID,
+		RoleID: actor.Role,
+		TeamID: actor.Team,
 	}); err != nil {
 		slog.Error("Error inserting actor: ", err)
 		return err
@@ -62,28 +48,21 @@ func (service *ServiceImpl) GetActor(id uuid.UUID) (Actor, error) {
 
 	role, err := service.roleRepo.Get(actor.RoleID)
 	if err != nil {
-		slog.Error("Error fetching role: ", err)
+		slog.Error("Error fetching role for actor with id: ", actor.ID, err)
 		return Actor{}, err
 	}
 
-	var teamName *string
-	if actor.TeamID != nil {
-		team, err := service.teamRepo.Get(*actor.TeamID)
-		if err != nil {
-			slog.Error("Error fetching team: ", err)
-			return Actor{}, err
-		}
-
-		teamName = lo.ToPtr(team.Name)
+	var permissions map[string]string
+	if err = json.Unmarshal(role.Permissions, &permissions); err != nil {
+		slog.Error("Error unmarshalling permissions for role with id: ", role.ID, err)
+		return Actor{}, err
 	}
 
 	return Actor{
-		ActorID: actor.ID,
-		Role:    role.Name,
-		Team:    teamName,
-		//Permissions: lo.Map(role.Permissions, func(permission models.Permission, _ int) string {
-		//	return permission.Name
-		//}),
+		ActorID:     actor.ID,
+		Role:        actor.RoleID,
+		Team:        actor.TeamID,
+		Permissions: permissions,
 	}, nil
 }
 
@@ -112,6 +91,12 @@ func (service *ServiceImpl) GetActors() ([]Actor, error) {
 			return Actor{}
 		}
 
+		var permissions map[string]string
+		if err = json.Unmarshal(role.Permissions, &permissions); err != nil {
+			slog.Error("Error unmarshalling permissions for role with id: ", role.ID, err)
+			return Actor{}
+		}
+
 		var team models.Team
 		if actor.TeamID != nil {
 			team, found = lo.Find(teams, func(team models.Team) bool {
@@ -125,14 +110,14 @@ func (service *ServiceImpl) GetActors() ([]Actor, error) {
 
 		return Actor{
 			ActorID:     actor.ID,
-			Role:        role.DisplayName,
-			Team:        lo.ToPtr(team.DisplayName),
-			Permissions: []string{},
+			Role:        role.ID,
+			Team:        lo.ToPtr(team.Name),
+			Permissions: permissions,
 		}
 	}), nil
 }
 
-func (service *ServiceImpl) GetActorsByTeamID(teamID uint) ([]Actor, error) {
+func (service *ServiceImpl) GetActorsByTeamID(teamID string) ([]Actor, error) {
 	actors, err := service.actorRepo.GetByTeamID(teamID)
 	if err != nil {
 		return nil, err
@@ -149,11 +134,17 @@ func (service *ServiceImpl) GetActorsByTeamID(teamID uint) ([]Actor, error) {
 			return Actor{}
 		}
 
+		var permissions map[string]string
+		if err = json.Unmarshal(role.Permissions, &permissions); err != nil {
+			slog.Error("Error unmarshalling permissions for role with id: ", role.ID, err)
+			return Actor{}
+		}
+
 		return Actor{
 			ActorID:     actor.ID,
-			Role:        role.Name,
+			Role:        role.ID,
 			Team:        nil,
-			Permissions: []string{},
+			Permissions: permissions,
 		}
 	}), nil
 }

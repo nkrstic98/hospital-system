@@ -10,8 +10,6 @@ export interface RegisterPatientRequest {
     lastname: string;
     nationalIdentificationNumber: string;
     medicalRecordNumber: string;
-    birthday: Date;
-    gender: string;
     email: string;
     phoneNumber: string;
 }

@@ -1,39 +1,39 @@
 version: '3.8'
 name: 'hospital-system'
 services:
-#  postgres:
-#    image: postgres:14.2-alpine
-#    restart: unless-stopped
-#    environment:
-#      - POSTGRES_USER=hospital_role
-#      - POSTGRES_PASSWORD=5tBsPvvXUBDw25zt
-#      - POSTGRES_HOST=localhost
-#      - POSTGRES_PORT=5432
-#      - POSTGRES_MULTIPLE_DATABASES=authz,hospital
-#    ports:
-#      - '5432:5432'
-#    volumes:
-#      - ./postgres_init/:/docker-entrypoint-initdb.d
-#      - pgdata:/var/lib/postgresql/data
-#    healthcheck:
-#      test: ['CMD-SHELL', 'pg_isready -U $DATABASE__USER']
-#      interval: 5s
-#      timeout: 5s
-#      retries: 5
-#  redis:
-#    image: redis:latest
-#    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-#    restart: unless-stopped
-#    ports:
-#      - '6379:6379'
-#    volumes:
-#      - redis_data:/data
-#      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+  postgres:
+    image: postgres:14.2-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=hospital_role
+      - POSTGRES_PASSWORD=5tBsPvvXUBDw25zt
+      - POSTGRES_HOST=localhost
+      - POSTGRES_PORT=5432
+      - POSTGRES_MULTIPLE_DATABASES=authz,hospital
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgres_init/:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $DATABASE__USER']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis:latest
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
   consul:
     image: hashicorp/consul:latest
     restart: unless-stopped
     ports:
       - '8500:8500'
-#volumes:
-#    pgdata:
-#    redis_data:
+volumes:
+    pgdata:
+    redis_data:

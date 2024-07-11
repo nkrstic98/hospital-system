@@ -14,7 +14,6 @@ const (
 	Session_Login_BadRequestErr            = "bad_request"
 	Session_Login_UserPasswordPairWrongErr = "user_password_pair_wrong"
 	Session_Login_UserNotFoundErr          = "user_not_found"
-	Session_Login_InactiveAccountErr       = "inactive_account"
 	Session_Login_CreateSessionFailedErr   = "create_session_failed"
 
 	Session_Logout_BadRequestErr          = "bad_request"
@@ -55,9 +54,6 @@ func (this *HandlerImpl) Login(c *gin.Context) {
 	if existingUser == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": Session_Login_UserNotFoundErr})
 		return
-	} else if existingUser.Archived != nil && *existingUser.Archived {
-		c.JSON(http.StatusForbidden, gin.H{"error": Session_Login_InactiveAccountErr})
-		return
 	}
 
 	isPasswordValid, err := this.userService.ValidateUserPassword(existingUser.ID, loginRequest.Password)
@@ -74,12 +70,14 @@ func (this *HandlerImpl) Login(c *gin.Context) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject: existingUser.ID.String(),
 		},
-		Username:    existingUser.Username,
-		Firstname:   existingUser.Firstname,
-		Lastname:    existingUser.Lastname,
-		Role:        existingUser.Role,
-		Team:        existingUser.Team,
-		Permissions: existingUser.Permissions,
+		Username:                     existingUser.Username,
+		NationalIdentificationNumber: existingUser.NationalIdentificationNumber,
+		Email:                        existingUser.Email,
+		Firstname:                    existingUser.Firstname,
+		Lastname:                     existingUser.Lastname,
+		Role:                         existingUser.Role,
+		Team:                         existingUser.Team,
+		Permissions:                  existingUser.Permissions,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": Session_Login_CreateSessionFailedErr})
@@ -97,15 +95,6 @@ func (this *HandlerImpl) Login(c *gin.Context) {
 			NationalIdentificationNumber: existingUser.NationalIdentificationNumber,
 			Username:                     existingUser.Username,
 			Email:                        existingUser.Email,
-			PhoneNumber:                  existingUser.PhoneNumber,
-			MailingAddress:               existingUser.MailingAddress,
-			City:                         existingUser.City,
-			State:                        existingUser.State,
-			Zip:                          existingUser.Zip,
-			Gender:                       existingUser.Gender,
-			Birthday:                     existingUser.Birthday,
-			JoiningDate:                  existingUser.JoiningDate,
-			Archived:                     existingUser.Archived,
 			Role:                         existingUser.Role,
 			Team:                         existingUser.Team,
 			Permissions:                  existingUser.Permissions,
@@ -153,27 +142,15 @@ func (this *HandlerImpl) ValidateSession(c *gin.Context) {
 	if err != nil || existingUser == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": Session_Validate_UserNotFoundErr})
 		return
-	} else if existingUser.Archived != nil && *existingUser.Archived {
-		c.JSON(http.StatusForbidden, gin.H{"error": Session_Validate_InactiveAccountErr})
-		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"user": user.User{
 			Firstname:                    claims.Firstname,
 			Lastname:                     claims.Lastname,
-			NationalIdentificationNumber: existingUser.NationalIdentificationNumber,
-			Username:                     existingUser.Username,
-			Email:                        existingUser.Email,
-			PhoneNumber:                  existingUser.PhoneNumber,
-			MailingAddress:               existingUser.MailingAddress,
-			City:                         existingUser.City,
-			State:                        existingUser.State,
-			Zip:                          existingUser.Zip,
-			Gender:                       existingUser.Gender,
-			Birthday:                     existingUser.Birthday,
-			JoiningDate:                  existingUser.JoiningDate,
-			Archived:                     existingUser.Archived,
+			NationalIdentificationNumber: claims.NationalIdentificationNumber,
+			Username:                     claims.Username,
+			Email:                        claims.Email,
 			Role:                         claims.Role,
 			Team:                         claims.Team,
 			Permissions:                  claims.Permissions,

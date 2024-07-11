@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 	"hospital-system/server/models"
 	"hospital-system/server/utils"
-	"time"
 )
 
 func ReinitDatabase() error {
@@ -15,7 +14,6 @@ func ReinitDatabase() error {
 		&models.Admission{},
 		&models.User{},
 		&models.Patient{},
-		&models.Schedule{},
 	)
 	if err != nil {
 		return err
@@ -25,7 +23,6 @@ func ReinitDatabase() error {
 		&models.User{},
 		&models.Patient{},
 		&models.Admission{},
-		&models.Schedule{},
 	); err != nil {
 		slog.Error(fmt.Sprintf("Failed to reinit database, error %s", err.Error()))
 		return err
@@ -41,17 +38,8 @@ func ReinitDatabase() error {
 			Lastname:                     "Reynolds",
 			NationalIdentificationNumber: "0101990640024",
 			Username:                     "admin",
-			Email:                        "john.reynolds@gmail.com",
+			Email:                        "admin@zmajmc.com",
 			Password:                     hashedPassword,
-			PhoneNumber:                  "+12066779158",
-			MailingAddress:               "9241 13th Ave SW",
-			City:                         "Seattle",
-			State:                        "Washington",
-			Zip:                          "98106",
-			Gender:                       "Male",
-			Birthday:                     time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
-			JoiningDate:                  time.Date(2020, 10, 1, 0, 0, 0, 0, time.UTC),
-			Verified:                     true,
 		}
 		result := tx.Create(&admin)
 		if result.Error != nil {

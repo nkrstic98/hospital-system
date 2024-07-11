@@ -6,8 +6,6 @@ export interface Patient {
     lastname: string;
     nationalIdentificationNumber: string;
     medicalRecordNumber: string;
-    birthday: Date;
-    gender: string;
     email: string;
     phoneNumber: string;
     admissions: Array<Admission>;

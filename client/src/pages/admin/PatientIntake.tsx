@@ -16,7 +16,7 @@ import {Admission} from "../../types/Admission.ts";
 import {Chip, Modal} from "@mui/material";
 
 const style = {
-    position: 'absolute' as 'absolute',
+    position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
@@ -37,17 +37,6 @@ const PatientIntake = () => {
     const getAdmissionTime = (admissionTime: Date) => {
         const date = new Date(admissionTime);
         return date.toLocaleDateString() + " " + date.toLocaleTimeString();
-    }
-
-    const handleDischarge = (id: string) => {
-        patientService.DischargePatient(id).then((success) => {
-            if(success) {
-                const updatedAdmissions = admissions.filter((a) => a.id !== id);
-                setAdmissions(updatedAdmissions);
-
-                setDischarged(true);
-            }
-        });
     }
 
     useEffect(() => {
@@ -101,12 +90,6 @@ const PatientIntake = () => {
                                                 <Chip label="Admitted" color="success" />
                                         }
                                     </TableCell>
-                                    {/*<TableCell align="center">*/}
-                                    {/*    {a.status === "pending" &&*/}
-                                    {/*        <Button variant="outlined" color="error" onClick={() => handleDischarge(a.id)}>*/}
-                                    {/*        Discharge*/}
-                                    {/*    </Button>}*/}
-                                    {/*</TableCell>*/}
                                 </TableRow>
                             ))}
                         </TableBody>
