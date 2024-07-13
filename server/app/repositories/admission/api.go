@@ -12,4 +12,6 @@ type Repository interface {
 	Update(admission *models.Admission) (*models.Admission, error)
 	GetByPatientId(id uuid.UUID) ([]models.Admission, error)
 	GetByStatuses(statuses []string) ([]models.Admission, error)
+	GetByIDs(ids []uuid.UUID) ([]models.Admission, error)
+	GetLabsByAdmissionID(admissionID uuid.UUID) ([]models.Lab, error)
 }

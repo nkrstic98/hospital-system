@@ -83,8 +83,8 @@ const Login = () => {
                     <CardMedia
                         component="img"
                         height="250"
-                        image="logo.png"
-                        alt="Zmaj Medical Center"
+                        image="logo-new.png"
+                        alt="Genesis Medical Center"
                     />
                 </Card>
             </Box>

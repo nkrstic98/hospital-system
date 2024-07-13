@@ -1,6 +1,7 @@
 import {Patient} from "../../types/Patient.ts";
 import {GetAuthorizationToken} from "../../utils/utils.ts";
 import {
+    GetActiveAdmissionsByUserRequest,
     GetAdmissionsRequest, GetAdmissionsResponse,
     PatientGetResponse,
     RegisterPatientAdmissionRequest,
@@ -67,7 +68,7 @@ export class PatientService {
 
     async RegisterPatientAdmission(request: RegisterPatientAdmissionRequest): Promise<boolean> {
         try {
-            const response = await fetch(`${this.baseUrl}/admission`, {
+            const response = await fetch(`${this.baseUrl}/admissions/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -87,15 +88,14 @@ export class PatientService {
         }
     }
 
-    async GetAdmissions(request: GetAdmissionsRequest): Promise<Admission[] | undefined> {
+    async GetActiveAdmissions(): Promise<Admission[] | undefined> {
         try {
             const response = await fetch(`${this.baseUrl}/admissions`, {
-                method: "POST",
+                method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": GetAuthorizationToken(),
                 },
-                body: JSON.stringify(request),
             });
 
             if (!response.ok) {
@@ -114,24 +114,51 @@ export class PatientService {
         }
     }
 
-    async DischargePatient(admissionId: string): Promise<boolean> {
-        try {
-            const response = await fetch(`${this.baseUrl}/admissions/${admissionId}/discharge`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": GetAuthorizationToken(),
-                },
-            });
+    // async GetActiveAdmissionsByUser(request: GetActiveAdmissionsByUserRequest): Promise<Admission[] | undefined> {
+    //     try {
+    //         const response = await fetch(`${this.baseUrl}/admissions`, {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //                 "Authorization": GetAuthorizationToken(),
+    //             },
+    //             body: JSON.stringify(request),
+    //         });
+    //
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! status: ${response.status}`);
+    //         }
+    //
+    //         const responseBody = await response.text();
+    //         const data = JSON.parse(responseBody) as GetAdmissionsResponse;
+    //
+    //         return data.admissions.sort((a, b) => {
+    //             return  new Date(b.admissionTime) > new Date(a.admissionTime) ? 1 : -1;
+    //         });
+    //     } catch (error) {
+    //         console.error("Failed to get patient admissions:", error);
+    //         return undefined;
+    //     }
+    // }
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return true;
-        } catch (error) {
-            console.error("Failed to discharge patient:", error);
-            return false;
-        }
-    }
+    // async DischargePatient(admissionId: string): Promise<boolean> {
+    //     try {
+    //         const response = await fetch(`${this.baseUrl}/admissions/${admissionId}/discharge`, {
+    //             method: "PATCH",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //                 "Authorization": GetAuthorizationToken(),
+    //             },
+    //         });
+    //
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! status: ${response.status}`);
+    //         }
+    //
+    //         return true;
+    //     } catch (error) {
+    //         console.error("Failed to discharge patient:", error);
+    //         return false;
+    //     }
+    // }
 }

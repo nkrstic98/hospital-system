@@ -20,14 +20,24 @@ export interface RegisterPatientResponse {
 
 export interface RegisterPatientAdmissionRequest {
     patientId: string;
-    department: string; // team in rbac
-    physician: string; // actor id
-    symptoms: string;
+    department: string;
+    physician: string;
+    chief_complaint: string;
+    history_of_present_illness: string;
+    past_medical_history: string;
     medications: string[];
     allergies: string[];
+    family_history: string;
+    social_history: string;
+    physical_examination: string;
 }
 
 export interface GetAdmissionsRequest {
+    statuses: string[];
+}
+
+export interface GetActiveAdmissionsByUserRequest {
+    userId: string;
     statuses: string[];
 }
 

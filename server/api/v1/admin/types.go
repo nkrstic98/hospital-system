@@ -29,12 +29,17 @@ type AddPatientRequest struct {
 }
 
 type AdmitPatientRequest struct {
-	PatientId   uuid.UUID `json:"patientId"`
-	Department  string    `json:"department"`
-	Physician   uuid.UUID `json:"physician"`
-	Symptoms    string    `json:"symptoms"`
-	Medications []string  `json:"medications"`
-	Allergies   []string  `json:"allergies"`
+	PatientId               uuid.UUID `json:"patientId"`
+	Department              string    `json:"department"`
+	Physician               uuid.UUID `json:"physician"`
+	ChiefComplaint          string    `json:"chief_complaint"`
+	HistoryOfPresentIllness string    `json:"history_of_present_illness"`
+	PastMedicalHistory      string    `json:"past_medical_history"`
+	Medications             []string  `json:"medications"`
+	Allergies               []string  `json:"allergies"`
+	FamilyHistory           string    `json:"family_history"`
+	SocialHistory           string    `json:"social_history"`
+	PhysicalExamination     string    `json:"physical_examination"`
 }
 
 type GetAdmissionsRequest struct {

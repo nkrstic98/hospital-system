@@ -28,5 +28,5 @@ export interface UserResponse {
     email: string;
     role:        string;
     team:        string | null;
-    permissions: Array<string> | null;
+    permissions: Map<string, string> | null;
 }

@@ -16,7 +16,7 @@ import PatientRegister from "./PatientRegister.tsx";
 import {Alert, Modal} from "@mui/material";
 import PatientAllergies from "./PatientAllergies.tsx";
 import PatientMedications from "./PatientMedications.tsx";
-import PatientSymptoms from "./PatientSymptoms.tsx";
+import TextInput from "./TextInput.tsx";
 import DepartmentsAndPhysicians from "./DepartmentsAndPhysicians.tsx";
 import {Department} from "../../services/department/types.ts";
 import {useNavigate} from "react-router-dom";
@@ -35,7 +35,20 @@ const style = {
     pb: 3,
 };
 
-const steps = ["Check Patient Existence", "Patient Information", "Enter Symptoms", "Enter Medications", "Enter Allergies", "Choose Department and Physician", "Summary"]
+const steps = [
+    "Check Patient Existence",
+    "Patient Information",
+    "Chief Complaint",
+    "History of Present Illness",
+    "Past Medical History",
+    "Medications",
+    "Allergies",
+    "Family History",
+    "Social History",
+    "Physical Examination",
+    "Summary",
+    "Admit Patient"
+]
 
 export type RegisterPatientFormFields = {
     firstname: string;
@@ -103,6 +116,12 @@ export default function PatientAdmissionStepper() {
     const [patientSymptomsError, setPatientSymptomsError] = useState(false);
     const [patientSymptoms, setPatientSymptoms] = useState<string>("");
 
+    const [hpi, setHPI] = useState<string>("");
+    const [pmh, setPMH] = useState<string>("");
+    const [fh, setFH] = useState<string>("");
+    const [sh, setSH] = useState<string>("");
+    const [pe, setPE] = useState<string>("");
+
     const [patientMedications, setPatientMedications] = useState<string[]>([]);
     const [checkedAllergies, setCheckedAllergies] = useState<string[]>([]);
 
@@ -115,14 +134,14 @@ export default function PatientAdmissionStepper() {
     const [physicianName, setPhysicianName] = useState<string>("");
     const [physicianError, setPhysicianError] = useState<boolean>(false);
 
-    const [activeStep, setActiveStep] = React.useState(0);
+    const [activeStep, setActiveStep] = React.useState<number>(0);
     const [skipped, setSkipped] = React.useState(new Set<number>());
 
     const [successfulAdmission, setSuccessfulAdmission] = useState(false);
     const [submissionFailure, setSubmissionFailure] = useState(false);
 
     const isStepOptional = (step: number) => {
-        return step === 0 || step === 3 || step == 4;
+        return step === 0 || (step >= 3 && step <= 9);
     };
 
     const isStepSkipped = (step: number) => {
@@ -176,9 +195,14 @@ export default function PatientAdmissionStepper() {
             patientId: patient?.id as string,
             department: department,
             physician: physician,
-            symptoms: patientSymptoms,
+            chief_complaint: patientSymptoms,
+            history_of_present_illness: hpi,
+            past_medical_history: pmh,
             medications: patientMedications,
             allergies: checkedAllergies,
+            family_history: fh,
+            social_history: sh,
+            physical_examination: pe
         }).then((r) => {
             if (!r) {
                 setSubmissionFailure(true);
@@ -228,14 +252,37 @@ export default function PatientAdmissionStepper() {
                         userRegisterAttempted={userRegisterAttempted}/>
                 </>;
             case 2:
-                return <PatientSymptoms patientSymptoms={patientSymptoms} setPatientSymptoms={setPatientSymptoms}
-                                        patientSymptomsError={patientSymptomsError}/>
+                return <TextInput currentStep={step} value={patientSymptoms} setValue={setPatientSymptoms}
+                                  error={patientSymptomsError} isRequired={true}/>;
             case 3:
-                return <PatientMedications handleMedicationsChange={setPatientMedications}/>;
+                return <TextInput currentStep={step} value={hpi} setValue={setHPI} isRequired={false}/>;
             case 4:
+                return <TextInput currentStep={step} value={pmh} setValue={setPMH} isRequired={false}/>;
+            case 5:
+                return <PatientMedications handleMedicationsChange={setPatientMedications}/>;
+            case 6:
                 return <PatientAllergies checkedAllergies={checkedAllergies}
                                          handleCheckboxChange={handleSelectAllergiesChange}/>;
-            case 5:
+            case 7:
+                return <TextInput currentStep={step} value={fh} setValue={setFH} isRequired={false}/>;
+            case 8:
+                return <TextInput currentStep={step} value={sh} setValue={setSH} isRequired={false}/>;
+            case 9:
+                return <TextInput currentStep={step} value={pe} setValue={setPE} isRequired={false}/>;
+            case 10:
+                return <div>
+                    <h3>Please check data before proceeding!</h3>
+                    <p><b>Admission Date: </b>{new Date().toLocaleDateString()}</p>
+                    <p><b>Chief Complaint: </b> {patientSymptoms}</p>
+                    <p><b>History of Present Illness: </b> {hpi}</p>
+                    <p><b>Past Medical History: </b> {pmh}</p>
+                    <p><b>Medications: </b> {patientMedications.length > 0 ? patientMedications.join(", ") : "/"}</p>
+                    <p><b>Allergies: </b>{checkedAllergies.length > 0 ? checkedAllergies.join(", ") : "/"}</p>
+                    <p><b>Family History: </b> {fh}</p>
+                    <p><b>Social History: </b> {sh}</p>
+                    <p><b>Physical Examination: </b> {pe}</p>
+                </div>
+            case 11:
                 return <DepartmentsAndPhysicians
                     departmentPhysicians={departmentPhysicians}
                     department={department}
@@ -246,16 +293,6 @@ export default function PatientAdmissionStepper() {
                     departmentError={departmentError}
                     physicianError={physicianError}
                 />;
-            case 6:
-                return <div>
-                    <h3>Please check data before proceeding!</h3>
-                    <p><b>Chosen Department:</b> {departmentPhysicians?.get(department)?.displayName}</p>
-                    <p><b>Chosen Physician: </b>{physicianName}</p>
-                    <p><b>Admission Date: </b>{new Date().toLocaleDateString()}</p>
-                    <p><b>Symptoms: </b> {patientSymptoms}</p>
-                    <p><b>Medications: </b> {patientMedications.length > 0 ? patientMedications.join(", ") : "/"}</p>
-                    <p><b>Allergies: </b>{checkedAllergies.length > 0 ? checkedAllergies.join(", ") : "/"}</p>
-                </div>
             default:
                 return "Unknown step";
         }
@@ -273,7 +310,7 @@ export default function PatientAdmissionStepper() {
                 }
             case 2:
                 return handlePatientSymptoms;
-            case 5:
+            case 11:
                 return handleDepartmentsAndPhysicians;
             default:
                 return handleNext;
@@ -312,7 +349,6 @@ export default function PatientAdmissionStepper() {
             form.lastname == "" ||
             form.nationalIdentificationNumber == "" ||
             form.medicalRecordNumber == "" ||
-            form.email == "" ||
             form.phoneNumber == "") {
             setUserRegisterAttempted(true);
             return;
@@ -392,11 +428,6 @@ export default function PatientAdmissionStepper() {
                     const labelProps: {
                         optional?: React.ReactNode;
                     } = {};
-                    if (isStepOptional(index)) {
-                        labelProps.optional = (
-                            <Typography variant="caption">Optional</Typography>
-                        );
-                    }
                     if (isStepSkipped(index)) {
                         stepProps.completed = false;
                     }
@@ -466,7 +497,7 @@ export default function PatientAdmissionStepper() {
 
             <Modal
                 open={successfulAdmission}
-                onClose={() => navigate("/admin")}
+                onClose={() => navigate("/intakte")}
                 aria-labelledby="parent-modal-title"
                 aria-describedby="parent-modal-description"
             >
@@ -480,7 +511,7 @@ export default function PatientAdmissionStepper() {
                     </p>
                     <Button
                         variant="text"
-                        onClick={() => navigate("/admin")}
+                        onClick={() => navigate("/patient-intake")}
                     >
                         Go Back to Dashboard
                     </Button>
@@ -489,7 +520,7 @@ export default function PatientAdmissionStepper() {
 
             <Modal
                 open={patientAdmitted}
-                onClose={() => navigate("/admin")}
+                onClose={() => navigate("/patient-intake")}
                 aria-labelledby="parent-modal-title"
                 aria-describedby="parent-modal-description"
             >
@@ -503,7 +534,7 @@ export default function PatientAdmissionStepper() {
                     </p>
                     <Button
                         variant="text"
-                        onClick={() => navigate("/admin")}
+                        onClick={() => navigate("/patient-intake")}
                     >
                         Return to Patient Intake
                     </Button>

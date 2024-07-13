@@ -52,7 +52,7 @@ const EmployeeManagement = ()=> {
                     variant="contained"
                     sx={{ mt: 3, mb: 5 }}
                     startIcon={<AddIcon />}
-                    onClick={() => navigate("/admin/employees/register")}
+                    onClick={() => navigate("/employees/register")}
                 >
                     Add New Employee
                 </Button>

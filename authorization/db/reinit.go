@@ -34,7 +34,7 @@ func ReinitDatabase() error {
 		adminRole := models.Role{
 			ID:          "ADMIN",
 			Name:        "Administrator",
-			Permissions: []byte(`{"EMPLOYEES":"WRITE", "PATIENTS":"WRITE"}`),
+			Permissions: []byte(`{"EMPLOYEES":"WRITE"}`),
 		}
 		result := tx.Create(&adminRole)
 		if result.Error != nil {

@@ -14,6 +14,8 @@ import {PatientService} from "../../services/patient/Patient.ts";
 import {useEffect, useState} from "react";
 import {Admission} from "../../types/Admission.ts";
 import {Chip, Modal} from "@mui/material";
+import {GetUserPermission} from "../../utils/utils.ts";
+import {useAuth} from "../../router/AuthProvider.tsx";
 
 const style = {
     position: 'absolute',
@@ -28,8 +30,14 @@ const style = {
     pb: 3,
 };
 
-const PatientIntake = () => {
+export interface PatientIntakeProps {
+    section: string;
+}
+
+const PatientIntake = ({ section }: PatientIntakeProps) => {
+    const { isAuthenticated, user } = useAuth();
     const navigate = useNavigate();
+    const [permission, setPermission] = useState<string>();
     const patientService = new PatientService();
     const [admissions, setAdmissions] = useState<Admission[]>([]);
     const [discharged, setDischarged] = useState<boolean>(false);
@@ -40,7 +48,16 @@ const PatientIntake = () => {
     }
 
     useEffect(() => {
-        patientService.GetAdmissions({
+        const permission = GetUserPermission(user, section);
+        if (permission === undefined) {
+            navigate("/login");
+        }
+
+        setPermission(permission);
+    }, [isAuthenticated, section, user]);
+
+    useEffect(() => {
+        patientService.GetActiveAdmissions({
             statuses: ["pending", "admitted"]
         }).then((admissions) => {
             if(admissions) {
@@ -50,17 +67,17 @@ const PatientIntake = () => {
     }, []);
 
     return (
-        <Box sx={{ display: 'flex', mt: 4 }}>
+        <Box sx={{ display: 'flex', mt: 7 }}>
             <CssBaseline />
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                <Button
+                {permission == "WRITE" && <Button
                     variant="contained"
-                    sx={{ mt: 3, mb: 5 }}
+                    sx={{ mb: 5 }}
                     startIcon={<AddIcon />}
-                    onClick={() => navigate("/admin/patients/admissions")}
+                    onClick={() => navigate("/patient-intake/new-admission")}
                 >
-                    Admit New Patient
-                </Button>
+                    Admit Patient
+                </Button>}
                 <TableContainer component={Paper}>
                     <Table aria-label="collapsible table">
                         <TableHead>

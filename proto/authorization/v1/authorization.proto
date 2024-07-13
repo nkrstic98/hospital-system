@@ -11,6 +11,7 @@ service AuthorizationService {
   rpc GetTeams(GetTeamsRequest) returns (GetTeamsResponse);
   rpc AddResource(AddResourceRequest) returns (AddResourceResponse);
   rpc GetResources(GetResourcesRequest) returns (GetResourcesResponse);
+  rpc GetActorResources(GetActorResourcesRequest) returns (GetActorResourcesResponse);
   rpc ArchiveResource(ArchiveResourceRequest) returns (ArchiveResourceResponse);
 }
 
@@ -55,6 +56,15 @@ message GetResourcesRequest {
 }
 
 message GetResourcesResponse {
+  repeated Resource resources = 1;
+}
+
+message GetActorResourcesRequest {
+  string actor_id = 1;
+  bool archived = 2;
+}
+
+message GetActorResourcesResponse {
   repeated Resource resources = 1;
 }
 

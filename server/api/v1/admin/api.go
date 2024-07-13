@@ -9,8 +9,8 @@ type Handler interface {
 	AddPatient(c *gin.Context)
 	GetPatient(c *gin.Context)
 	AdmitPatient(c *gin.Context)
-	GetAdmissions(c *gin.Context)
+	GetActiveAdmissions(c *gin.Context)
+	GetAdmission(c *gin.Context)
+	GetActiveAdmissionsByPhysician(c *gin.Context)
 	GetDepartments(c *gin.Context)
-	AddRole(c *gin.Context)
-	AddTeam(c *gin.Context)
 }

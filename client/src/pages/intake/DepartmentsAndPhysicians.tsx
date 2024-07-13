@@ -72,7 +72,7 @@ const DepartmentsAndPhysicians = ({
                 >
                     {
                         departmentPhysicians !== undefined &&
-                        departmentPhysicians.get(department)?.physicians.map((p, _) => (
+                        departmentPhysicians.get(department)?.physicians.map((p) => (
                             <MenuItem key={p.id} value={JSON.stringify(p)}>{p.fullName}</MenuItem>
                         ))
                     }

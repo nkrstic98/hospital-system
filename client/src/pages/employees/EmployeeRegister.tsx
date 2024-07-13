@@ -15,7 +15,7 @@ import {UserService} from "../../services/user/User.ts";
 import {useNavigate} from "react-router-dom";
 
 const style = {
-    position: 'absolute' as 'absolute',
+    position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
@@ -36,7 +36,7 @@ type RegisterFormFields = {
     team: string | undefined;
 }
 
-const registerForm = () => {
+const useRegisterForm = () => {
     const [form, setForm] = useState<RegisterFormFields>({
         firstname: "",
         lastname: "",
@@ -81,14 +81,14 @@ const teams: Map<string, string> = new Map([
     ["ONCOLOGY", "Oncology"],
     ["PSYCH", "Psychiatry"],
     ["UROLOGY", "Urology"],
-    ["RADIOLOGY", "Radiology"]
+    ["ER", "Emergency Medicine"]
 ]);
 
 const EmployeeRegister = ()=> {
     const navigate = useNavigate();
     const userService: UserService = new UserService();
     const [submitAttempted, setSubmitAttempted] = useState(false);
-    const { form, updateFormField } = registerForm();
+    const { form, updateFormField } = useRegisterForm();
     const [role, setRole] = useState('');
     const [team, setTeam] = useState('');
     const [success, setSuccess] = useState(false);
@@ -269,7 +269,7 @@ const EmployeeRegister = ()=> {
 
                 <Modal
                     open={success}
-                    onClose={() => navigate("/admin/employees")}
+                    onClose={() => navigate("/employees")}
                     aria-labelledby="parent-modal-title"
                     aria-describedby="parent-modal-description"
                 >
@@ -280,7 +280,7 @@ const EmployeeRegister = ()=> {
                         </p>
                         <Button
                             variant="text"
-                            onClick={() => navigate("/admin/employees")}
+                            onClick={() => navigate("/employees")}
                         >
                             Go Back to Employees page
                         </Button>

@@ -1,28 +1,52 @@
 package resource
 
 import (
+	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"golang.org/x/exp/slog"
 	"hospital-system/authorization/app/repositories/resource"
+	"hospital-system/authorization/app/services/actor"
 	"hospital-system/authorization/models"
 )
 
 type ServiceImpl struct {
 	resourceRepo resource.Repository
+	actorService actor.Service
 }
 
-func NewService(resourceRepo resource.Repository) *ServiceImpl {
+func NewService(resourceRepo resource.Repository, ctorService actor.Service) *ServiceImpl {
 	return &ServiceImpl{
 		resourceRepo: resourceRepo,
+		actorService: ctorService,
 	}
 }
 
 func (s *ServiceImpl) AddResource(request Resource) error {
+	actor, err := s.actorService.GetActor(request.TeamLead)
+	if err != nil {
+		slog.Error("Failed to fetch actor", request.ID, err)
+		return err
+	}
+
+	assignments := []Assignment{
+		{
+			ActorID:     request.TeamLead,
+			Role:        actor.Role,
+			Permissions: actor.Permissions,
+		},
+	}
+
+	marshalledAssignments, stdErr := json.Marshal(assignments)
+	if stdErr != nil {
+		slog.Error("Failed to marshal assignments", request.ID, err)
+	}
+
 	return s.resourceRepo.Insert(models.Resource{
-		ID:       request.ID,
-		Team:     request.Team,
-		TeamLead: request.TeamLead,
+		ID:              request.ID,
+		Team:            request.Team,
+		TeamLead:        request.TeamLead,
+		TeamAssignments: marshalledAssignments,
 	})
 }
 

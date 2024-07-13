@@ -101,11 +101,8 @@ func provideRedisClient(cfg config.Config) (*redis.Client, func()) {
 }
 
 func provideUserClient(config2 config.Config, discovery registry.Discovery) (authorization.AuthorizationServiceClient, func()) {
-	conn, err := grpc.Dial("localhost:8081", grpc.WithInsecure())
-	if err != nil {
-		panic(fmt.Sprintf("Failed to dial authorization service. Error:\n%v", err))
-	}
 
+	conn := provideConnection("authorization", discovery)
 	return authorization.NewAuthorizationServiceClient(conn), func() {
 		if err := conn.Close(); err != nil {
 			panic(fmt.Sprintf("Failed to close connection. Error:\n%v", err))

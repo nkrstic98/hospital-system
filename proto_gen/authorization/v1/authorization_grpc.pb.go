@@ -19,13 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	AuthorizationService_AddActor_FullMethodName        = "/authorization.v1.AuthorizationService/AddActor"
-	AuthorizationService_GetActor_FullMethodName        = "/authorization.v1.AuthorizationService/GetActor"
-	AuthorizationService_GetActors_FullMethodName       = "/authorization.v1.AuthorizationService/GetActors"
-	AuthorizationService_GetTeams_FullMethodName        = "/authorization.v1.AuthorizationService/GetTeams"
-	AuthorizationService_AddResource_FullMethodName     = "/authorization.v1.AuthorizationService/AddResource"
-	AuthorizationService_GetResources_FullMethodName    = "/authorization.v1.AuthorizationService/GetResources"
-	AuthorizationService_ArchiveResource_FullMethodName = "/authorization.v1.AuthorizationService/ArchiveResource"
+	AuthorizationService_AddActor_FullMethodName          = "/authorization.v1.AuthorizationService/AddActor"
+	AuthorizationService_GetActor_FullMethodName          = "/authorization.v1.AuthorizationService/GetActor"
+	AuthorizationService_GetActors_FullMethodName         = "/authorization.v1.AuthorizationService/GetActors"
+	AuthorizationService_GetTeams_FullMethodName          = "/authorization.v1.AuthorizationService/GetTeams"
+	AuthorizationService_AddResource_FullMethodName       = "/authorization.v1.AuthorizationService/AddResource"
+	AuthorizationService_GetResources_FullMethodName      = "/authorization.v1.AuthorizationService/GetResources"
+	AuthorizationService_GetActorResources_FullMethodName = "/authorization.v1.AuthorizationService/GetActorResources"
+	AuthorizationService_ArchiveResource_FullMethodName   = "/authorization.v1.AuthorizationService/ArchiveResource"
 )
 
 // AuthorizationServiceClient is the client API for AuthorizationService service.
@@ -38,6 +39,7 @@ type AuthorizationServiceClient interface {
 	GetTeams(ctx context.Context, in *GetTeamsRequest, opts ...grpc.CallOption) (*GetTeamsResponse, error)
 	AddResource(ctx context.Context, in *AddResourceRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
 	GetResources(ctx context.Context, in *GetResourcesRequest, opts ...grpc.CallOption) (*GetResourcesResponse, error)
+	GetActorResources(ctx context.Context, in *GetActorResourcesRequest, opts ...grpc.CallOption) (*GetActorResourcesResponse, error)
 	ArchiveResource(ctx context.Context, in *ArchiveResourceRequest, opts ...grpc.CallOption) (*ArchiveResourceResponse, error)
 }
 
@@ -109,6 +111,16 @@ func (c *authorizationServiceClient) GetResources(ctx context.Context, in *GetRe
 	return out, nil
 }
 
+func (c *authorizationServiceClient) GetActorResources(ctx context.Context, in *GetActorResourcesRequest, opts ...grpc.CallOption) (*GetActorResourcesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetActorResourcesResponse)
+	err := c.cc.Invoke(ctx, AuthorizationService_GetActorResources_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *authorizationServiceClient) ArchiveResource(ctx context.Context, in *ArchiveResourceRequest, opts ...grpc.CallOption) (*ArchiveResourceResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ArchiveResourceResponse)
@@ -129,6 +141,7 @@ type AuthorizationServiceServer interface {
 	GetTeams(context.Context, *GetTeamsRequest) (*GetTeamsResponse, error)
 	AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error)
 	GetResources(context.Context, *GetResourcesRequest) (*GetResourcesResponse, error)
+	GetActorResources(context.Context, *GetActorResourcesRequest) (*GetActorResourcesResponse, error)
 	ArchiveResource(context.Context, *ArchiveResourceRequest) (*ArchiveResourceResponse, error)
 	mustEmbedUnimplementedAuthorizationServiceServer()
 }
@@ -154,6 +167,9 @@ func (UnimplementedAuthorizationServiceServer) AddResource(context.Context, *Add
 }
 func (UnimplementedAuthorizationServiceServer) GetResources(context.Context, *GetResourcesRequest) (*GetResourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResources not implemented")
+}
+func (UnimplementedAuthorizationServiceServer) GetActorResources(context.Context, *GetActorResourcesRequest) (*GetActorResourcesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetActorResources not implemented")
 }
 func (UnimplementedAuthorizationServiceServer) ArchiveResource(context.Context, *ArchiveResourceRequest) (*ArchiveResourceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ArchiveResource not implemented")
@@ -279,6 +295,24 @@ func _AuthorizationService_GetResources_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthorizationService_GetActorResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetActorResourcesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthorizationServiceServer).GetActorResources(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthorizationService_GetActorResources_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthorizationServiceServer).GetActorResources(ctx, req.(*GetActorResourcesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AuthorizationService_ArchiveResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ArchiveResourceRequest)
 	if err := dec(in); err != nil {
@@ -327,6 +361,10 @@ var AuthorizationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetResources",
 			Handler:    _AuthorizationService_GetResources_Handler,
+		},
+		{
+			MethodName: "GetActorResources",
+			Handler:    _AuthorizationService_GetActorResources_Handler,
 		},
 		{
 			MethodName: "ArchiveResource",

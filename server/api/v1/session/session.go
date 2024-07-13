@@ -146,6 +146,7 @@ func (this *HandlerImpl) ValidateSession(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"user": user.User{
+			ID:                           existingUser.ID,
 			Firstname:                    claims.Firstname,
 			Lastname:                     claims.Lastname,
 			NationalIdentificationNumber: claims.NationalIdentificationNumber,

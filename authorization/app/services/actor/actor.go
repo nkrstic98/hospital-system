@@ -2,6 +2,7 @@ package actor
 
 import (
 	"encoding/json"
+	"golang.org/x/exp/maps"
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -58,6 +59,24 @@ func (service *ServiceImpl) GetActor(id uuid.UUID) (Actor, error) {
 		return Actor{}, err
 	}
 
+	if actor.TeamID != nil {
+		team, err := service.teamRepo.Get(*actor.TeamID)
+		if err != nil {
+			slog.Error("Error fetching team for actor with id: ", actor.ID, err)
+			return Actor{}, err
+		}
+
+		if team.Permissions != nil {
+			teamPermissions := map[string]string{}
+			if err = json.Unmarshal(team.Permissions, &teamPermissions); err != nil {
+				slog.Error("Error unmarshalling permissions for team with id: ", team.ID, err)
+				return Actor{}, err
+			}
+
+			maps.Copy(permissions, teamPermissions)
+		}
+	}
+
 	return Actor{
 		ActorID:     actor.ID,
 		Role:        actor.RoleID,
@@ -110,7 +129,7 @@ func (service *ServiceImpl) GetActors() ([]Actor, error) {
 
 		return Actor{
 			ActorID:     actor.ID,
-			Role:        role.ID,
+			Role:        role.Name,
 			Team:        lo.ToPtr(team.Name),
 			Permissions: permissions,
 		}

@@ -8,16 +8,27 @@ import (
 const AdminRole = "ADMIN"
 
 func (handler *HandlerImpl) RegisterRoutes(router *gin.Engine, middleware func(string) gin.HandlerFunc) {
+	// Register user
 	router.POST(path("users"), middleware(AdminRole), handler.AddUser)
+	// Get users
 	router.GET(path("users"), middleware(AdminRole), handler.GetUsers)
-	router.POST(path("patients"), middleware(AdminRole), handler.AddPatient)
+
+	// Get patient by id
 	router.GET(path("patients/:id"), middleware(AdminRole), handler.GetPatient)
-	router.POST(path("patients/admission"), middleware(AdminRole), handler.AdmitPatient)
-	router.POST(path("patients/admissions"), middleware(AdminRole), handler.GetAdmissions)
-	router.PATCH(path("patients/admissions/:id/discharge"), middleware(AdminRole), handler.Discharge)
+	// Register patient
+	router.POST(path("patients"), middleware(AdminRole), handler.AddPatient)
+
+	// Admit patient
+	router.POST(path("patients/admissions/register"), middleware(AdminRole), handler.AdmitPatient)
+	// Get all active admissions
+	router.GET(path("patients/admissions"), middleware(AdminRole), handler.GetActiveAdmissions)
+	// Get admission by id
+	router.GET(path("patients/admissions/:id"), middleware(AdminRole), handler.GetAdmission)
+	// Get active admissions by physician id
+	router.POST(path("patients/admissions/physician/:id"), middleware(AdminRole), handler.GetActiveAdmissionsByPhysician)
+
+	// Get departments
 	router.GET(path("departments"), middleware(AdminRole), handler.GetDepartments)
-	router.POST(path("roles"), middleware(AdminRole), handler.AddRole)
-	router.POST(path("teams"), middleware(AdminRole), handler.AddTeam)
 }
 
 func path(endpoint string) string {

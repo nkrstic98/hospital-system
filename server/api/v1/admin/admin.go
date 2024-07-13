@@ -124,12 +124,19 @@ func (handler *HandlerImpl) AdmitPatient(c *gin.Context) {
 		return
 	}
 
-	err := handler.patientService.RegisterPatientAdmission(admitPatientRequest.PatientId, patient.Admission{
-		Symptoms:    admitPatientRequest.Symptoms,
-		Medications: admitPatientRequest.Medications,
-		Allergies:   admitPatientRequest.Allergies,
-		Department:  admitPatientRequest.Department,
-		Physician:   admitPatientRequest.Physician,
+	err := handler.patientService.RegisterPatientAdmission(admitPatientRequest.PatientId, patient.AdmissionDetails{
+		Anamnesis: patient.Anamnesis{
+			ChiefComplaint:          admitPatientRequest.ChiefComplaint,
+			HistoryOfPresentIllness: admitPatientRequest.HistoryOfPresentIllness,
+			PastMedicalHistory:      admitPatientRequest.PastMedicalHistory,
+			Medications:             admitPatientRequest.Medications,
+			Allergies:               admitPatientRequest.Allergies,
+			FamilyHistory:           admitPatientRequest.FamilyHistory,
+			SocialHistory:           admitPatientRequest.SocialHistory,
+			PhysicalExamination:     admitPatientRequest.PhysicalExamination,
+		},
+		Department: admitPatientRequest.Department,
+		Physician:  admitPatientRequest.Physician,
 	})
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -139,14 +146,8 @@ func (handler *HandlerImpl) AdmitPatient(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{})
 }
 
-func (handler *HandlerImpl) GetAdmissions(c *gin.Context) {
-	var getAdmissionsRequest GetAdmissionsRequest
-	if err := c.BindJSON(&getAdmissionsRequest); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	admissions, err := handler.patientService.GetAdmissionsByStatuses(getAdmissionsRequest.Statuses)
+func (handler *HandlerImpl) GetActiveAdmissions(c *gin.Context) {
+	admissions, err := handler.patientService.GetAdmissionsByStatuses([]string{"pending", "admitted"})
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -157,7 +158,7 @@ func (handler *HandlerImpl) GetAdmissions(c *gin.Context) {
 	}
 
 	for _, admission := range admissions {
-		patientName, err := handler.patientService.GetPatientName(admission.PatientID)
+		patientName, err := handler.patientService.GetPatientName(admission.Patient.ID)
 		if err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -182,20 +183,80 @@ func (handler *HandlerImpl) GetAdmissions(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, response)
 }
 
-func (handler *HandlerImpl) Discharge(c *gin.Context) {
+// TODO: Fix this flow
+func (handler *HandlerImpl) GetAdmission(c *gin.Context) {
 	admissionId := c.Param("id")
 	if admissionId == "" {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "admission id is required"})
 		return
 	}
 
-	err := handler.patientService.Discharge(uuid.MustParse(admissionId))
+	admission, err := handler.patientService.GetAdmission(uuid.MustParse(admissionId))
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	patientName, err := handler.patientService.GetPatientName(admission.Patient.ID)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{})
+	physician, err := handler.userService.GetUser(admission.Physician)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"admission": AdmissionResponse{
+			Id:            admission.ID,
+			Patient:       patientName,
+			Department:    admission.Department,
+			Physician:     fmt.Sprintf("Doctor %s, %s, MD", physician.Lastname, physician.Firstname),
+			AdmissionTime: admission.StartTime,
+			Status:        admission.Status,
+		},
+	})
+
+}
+
+func (handler *HandlerImpl) GetActiveAdmissionsByPhysician(c *gin.Context) {
+	physicianId := c.Param("id")
+	if physicianId == "" {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "physician id is required"})
+		return
+	}
+
+	admissions, err := handler.patientService.GetActiveAdmissionsByPhysician(uuid.MustParse(physicianId))
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	response := GetAdmissionsResponse{
+		Admissions: make([]AdmissionResponse, 0),
+	}
+
+	for _, admission := range admissions {
+		patientName, err := handler.patientService.GetPatientName(admission.Patient.ID)
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		response.Admissions = append(response.Admissions, AdmissionResponse{
+			Id:            admission.ID,
+			Patient:       patientName,
+			Department:    admission.Department,
+			AdmissionTime: admission.StartTime,
+			Status:        admission.Status,
+		})
+	}
+
+	c.IndentedJSON(http.StatusOK, response)
+
 }
 
 func (handler *HandlerImpl) GetDepartments(c *gin.Context) {
@@ -208,12 +269,4 @@ func (handler *HandlerImpl) GetDepartments(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{
 		"departments": departments,
 	})
-}
-
-func (handler *HandlerImpl) AddRole(c *gin.Context) {
-
-}
-
-func (handler *HandlerImpl) AddTeam(c *gin.Context) {
-
 }

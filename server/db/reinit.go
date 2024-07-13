@@ -11,9 +11,10 @@ import (
 
 func ReinitDatabase() error {
 	err := DB.Migrator().DropTable(
-		&models.Admission{},
 		&models.User{},
 		&models.Patient{},
+		&models.Admission{},
+		&models.Lab{},
 	)
 	if err != nil {
 		return err
@@ -23,6 +24,7 @@ func ReinitDatabase() error {
 		&models.User{},
 		&models.Patient{},
 		&models.Admission{},
+		&models.Lab{},
 	); err != nil {
 		slog.Error(fmt.Sprintf("Failed to reinit database, error %s", err.Error()))
 		return err

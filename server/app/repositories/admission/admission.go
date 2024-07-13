@@ -42,7 +42,7 @@ func (repo *RepositoryImpl) Insert(admission models.Admission) (*models.Admissio
 func (repo *RepositoryImpl) Get(id uuid.UUID) (*models.Admission, error) {
 	var admission models.Admission
 	if err := repo.db.Transaction(func(tx *gorm.DB) error {
-		result := repo.db.Clauses(
+		result := tx.Clauses(
 			clause.Locking{Strength: clause.LockingStrengthShare},
 		).Where("id = ?", id.String()).First(&admission)
 		if result.Error != nil {
@@ -90,7 +90,7 @@ func (repo *RepositoryImpl) Delete(id uuid.UUID) error {
 func (repo *RepositoryImpl) GetByPatientId(id uuid.UUID) ([]models.Admission, error) {
 	var admissions []models.Admission
 	if err := repo.db.Transaction(func(tx *gorm.DB) error {
-		result := repo.db.Clauses(
+		result := tx.Clauses(
 			clause.Locking{Strength: clause.LockingStrengthShare},
 		).Where("patient_id = ?", id.String()).Find(&admissions)
 		if result.Error != nil {
@@ -108,7 +108,7 @@ func (repo *RepositoryImpl) GetByPatientId(id uuid.UUID) ([]models.Admission, er
 func (repo *RepositoryImpl) GetByStatuses(statuses []string) ([]models.Admission, error) {
 	var admissions []models.Admission
 	if err := repo.db.Transaction(func(tx *gorm.DB) error {
-		result := repo.db.Clauses(
+		result := tx.Clauses(
 			clause.Locking{Strength: clause.LockingStrengthShare},
 		).Where("status IN (?)", statuses).Find(&admissions)
 		if result.Error != nil {
@@ -121,4 +121,40 @@ func (repo *RepositoryImpl) GetByStatuses(statuses []string) ([]models.Admission
 	}
 
 	return admissions, nil
+}
+
+func (repo *RepositoryImpl) GetByIDs(ids []uuid.UUID) ([]models.Admission, error) {
+	var admissions []models.Admission
+	if err := repo.db.Transaction(func(tx *gorm.DB) error {
+		result := tx.Clauses(
+			clause.Locking{Strength: clause.LockingStrengthShare},
+		).Where("id IN (?)", ids).Find(&admissions)
+		if result.Error != nil {
+			return result.Error
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return admissions, nil
+}
+
+func (repo *RepositoryImpl) GetLabsByAdmissionID(admissionID uuid.UUID) ([]models.Lab, error) {
+	var labs []models.Lab
+	if err := repo.db.Transaction(func(tx *gorm.DB) error {
+		result := tx.Clauses(
+			clause.Locking{Strength: clause.LockingStrengthShare},
+		).Where("admission_id = ?", admissionID.String()).Find(&labs)
+		if result.Error != nil {
+			return result.Error
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return labs, nil
 }

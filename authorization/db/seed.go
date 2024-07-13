@@ -9,17 +9,19 @@ import (
 )
 
 var attendingPermissionsMap = map[string]string{
+	"PATIENTS:HISTORY":            "READ",
 	"PATIENTS:INFO":               "WRITE",
 	"PATIENTS:VITALS":             "WRITE",
 	"PATIENTS:DIAGNOSIS":          "WRITE",
+	"PATIENTS:CONSULTS":           "WRITE",
 	"PATIENTS:TRANSFER":           "WRITE",
 	"PATIENTS:DISCHARGE":          "WRITE",
 	"PATIENTS:MEDICINE:PRESCRIBE": "WRITE",
 	"PATIENTS:MEDICINE:GIVE":      "WRITE",
 	"PATIENTS:LABS:ORDER":         "WRITE",
-	"PATIENTS:LABS:RESULT":        "WRITE",
+	"PATIENTS:LABS:RESULT":        "READ",
 	"PATIENTS:IMAGING:ORDER":      "WRITE",
-	"PATIENTS:IMAGING:RESULT":     "WRITE",
+	"PATIENTS:IMAGING:RESULT":     "READ",
 }
 
 var residentPermissionsMap = map[string]string{
@@ -36,13 +38,6 @@ var nursePermissionsMap = map[string]string{
 	"PATIENTS:VITALS":        "WRITE",
 	"PATIENTS:DIAGNOSIS":     "READ",
 	"PATIENTS:MEDICINE:GIVE": "WRITE",
-}
-
-var technicianPermissionsMap = map[string]string{
-	"PATIENTS:INFO":      "READ",
-	"PATIENTS:DIAGNOSIS": "READ",
-	"PATIENTS:LABS":      "WRITE",
-	"PATIENTS:IMAGING":   "WRITE",
 }
 
 func SeedDatabase() error {
@@ -69,12 +64,6 @@ func SeedDatabase() error {
 		return err
 	}
 
-	technicianPermissionsSerialized, err := json.Marshal(technicianPermissionsMap)
-	if err != nil {
-		slog.Error("Failed to serialize technician permissions")
-		return err
-	}
-
 	if err = DB.Transaction(func(tx *gorm.DB) error {
 		// Add predefined roles
 		if err = tx.Create([]models.Role{
@@ -94,9 +83,8 @@ func SeedDatabase() error {
 				Permissions: nursePermissionsSerialized,
 			},
 			{
-				ID:          "TECHNICIAN",
-				Name:        "Technician",
-				Permissions: technicianPermissionsSerialized,
+				ID:   "TECHNICIAN",
+				Name: "Technician",
 			},
 		}).Error; err != nil {
 			slog.Error(fmt.Sprintf("Failed to create predefined roles: %s", err.Error()))
@@ -106,44 +94,64 @@ func SeedDatabase() error {
 		// Add predefined teams
 		if err = tx.Create([]models.Team{
 			{
-				ID:   "GENERAL",
-				Name: "Internal Medicine",
+				ID:          "GENERAL",
+				Name:        "Internal Medicine",
+				Permissions: []byte(`{"PATIENTS": "READ"}`),
 			},
 			{
-				ID:   "CARDIO",
-				Name: "Cardiology",
+				ID:          "CARDIO",
+				Name:        "Cardiology",
+				Permissions: []byte(`{"PATIENTS": "READ"}`),
 			},
 			{
-				ID:   "NEURO",
-				Name: "Neurology",
+				ID:          "NEURO",
+				Name:        "Neurology",
+				Permissions: []byte(`{"PATIENTS": "READ"}`),
 			},
 			{
-				ID:   "ORTHO",
-				Name: "Orthopedics",
+				ID:          "ORTHO",
+				Name:        "Orthopedics",
+				Permissions: []byte(`{"PATIENTS": "READ"}`),
 			},
 			{
-				ID:   "OB-GYN",
-				Name: "Obstetrics and Gynecology",
+				ID:          "OB-GYN",
+				Name:        "Obstetrics and Gynecology",
+				Permissions: []byte(`{"PATIENTS": "READ"}`),
 			},
 			{
-				ID:   "PEDS",
-				Name: "Pediatrics",
+				ID:          "PEDS",
+				Name:        "Pediatrics",
+				Permissions: []byte(`{"PATIENTS": "READ"}`),
 			},
 			{
-				ID:   "ONCOLOGY",
-				Name: "Oncology",
+				ID:          "ONCOLOGY",
+				Name:        "Oncology",
+				Permissions: []byte(`{"PATIENTS": "READ"}`),
 			},
 			{
-				ID:   "PSYCH",
-				Name: "Psychiatry",
+				ID:          "PSYCH",
+				Name:        "Psychiatry",
+				Permissions: []byte(`{"PATIENTS": "READ"}`),
 			},
 			{
-				ID:   "UROLOGY",
-				Name: "Urology",
+				ID:          "UROLOGY",
+				Name:        "Urology",
+				Permissions: []byte(`{"PATIENTS": "READ"}`),
 			},
 			{
-				ID:   "RADIOLOGY",
-				Name: "Radiology",
+				ID:          "ER",
+				Name:        "Emergency Medicine",
+				Permissions: []byte(`{"INTAKE": "WRITE", "PATIENTS": "READ"}`),
+			},
+			{
+				ID:          "LAB",
+				Name:        "Laboratory",
+				Permissions: []byte(`{"LABS": "WRITE"}`),
+			},
+			{
+				ID:          "RADIOLOGY",
+				Name:        "Radiology",
+				Permissions: []byte(`{"IMAGING": "WRITE"}`),
 			},
 		}).Error; err != nil {
 			slog.Error(fmt.Sprintf("Failed to create predefined teams: %s", err.Error()))

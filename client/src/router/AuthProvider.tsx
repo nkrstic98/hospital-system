@@ -34,12 +34,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsAuthenticated(true);
         setUser(user);
 
-        if (user.role === "ADMIN") {
-            navigate('/admin');
-        }
-        else {
-            navigate('/user');
-        }
+        navigate("/home");
     };
 
     const handleLogout = () => {
@@ -77,12 +72,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 setIsAuthenticated(true);
                 setUser(r);
 
-                if (r.role === "ADMIN") {
-                    navigate('/admin');
-                }
-                else {
-                    navigate('/user');
-                }
+                navigate("/home");
             }
         })
     }, []);

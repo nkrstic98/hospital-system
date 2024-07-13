@@ -11,18 +11,13 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import CssBaseline from "@mui/material/CssBaseline";
 import {useAuth} from "../router/AuthProvider.tsx";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {GetUserPermission} from "../utils/utils.ts";
 
-const adminPages: Map<string, string> = new Map([
-    ['Patient Intake', '/admin'],
-    ['Employee Management', '/admin/employees'],
-    // ['Department Management', '/admin/departments'],
-]);
-
-const attendingPages: Map<string, string> = new Map([
-    ['Patient Intake', '/admin'],
-    ['Employee Management', '/admin/employees'],
-    // ['Department Management', '/admin/departments'],
+const adminPages: Map<string, string[]> = new Map([
+    ["INTAKE", ['Patient Intake', '/patient-intake']],
+    ["EMPLOYEES", ['Employee Management', '/employees']],
+    ["PATIENTS", ['Assigned Patients', '/patients']],
 ]);
 
 function ResponsiveAppBar() {
@@ -58,15 +53,17 @@ function ResponsiveAppBar() {
                             noWrap
                             component="div"
                             sx={{
-                                mr: 2,
+                                mr: 3,
                                 display: { xs: 'none', md: 'flex' },
-                                fontWeight: 700,
+                                fontWeight: 1000,
                                 letterSpacing: '.3rem',
                                 color: 'inherit',
                                 textDecoration: 'none',
                             }}
                         >
-                            Zmaj Medical Center
+                            <Link to="/home" style={{ color: 'inherit', textDecoration: 'none' }}>
+                                Genesis Medical
+                            </Link>
                         </Typography>
 
                         <Avatar
@@ -89,18 +86,20 @@ function ResponsiveAppBar() {
                                 textDecoration: 'none',
                             }}
                         >
-                            Zmaj Medical
+                            <Link to="/home" style={{ color: 'inherit', textDecoration: 'none' }}>
+                                Genesis Medical
+                            </Link>
                         </Typography>
 
                         <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
-                            {user !== undefined && user.role === "ADMIN" && Array.from(adminPages.entries()).map(([key, value]) => (
-                                <Button
+                            {Array.from(adminPages.entries()).map(([key, value]) => (
+                                GetUserPermission(user, key) && <Button
                                     variant="outlined"
                                     key={key}
                                     sx={{my: 2, color: 'white', display: 'block'}}
-                                    onClick={() => navigate(value)}
+                                    onClick={() => navigate(value[1])}
                                 >
-                                    {key}
+                                    {value[0]}
                                 </Button>
                             ))}
                         </Box>
@@ -143,7 +142,7 @@ function ResponsiveAppBar() {
                                     handleCloseUserMenu();
                                     onLogout();
                                 }}>
-                                    <Typography textAlign="center">Logout</Typography>
+                                    <Typography textAlign="center">Log Out</Typography>
                                 </MenuItem>
                             </Menu>
                         </Box>

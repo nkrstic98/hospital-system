@@ -54,7 +54,7 @@ func buildService(db2 *gorm.DB) *rpc.Service {
 	serviceImpl := actor2.NewService(repositoryImpl, roleRepositoryImpl, teamRepositoryImpl)
 	teamServiceImpl := team2.NewService(teamRepositoryImpl, serviceImpl)
 	resourceRepositoryImpl := resource.NewRepository(db2)
-	resourceServiceImpl := resource2.NewService(resourceRepositoryImpl)
+	resourceServiceImpl := resource2.NewService(resourceRepositoryImpl, serviceImpl)
 	service := rpc.NewService(serviceImpl, teamServiceImpl, resourceServiceImpl)
 	return service
 }

@@ -11,6 +11,7 @@ import (
 	"hospital-system/server/app/repositories/admission"
 	"hospital-system/server/app/repositories/patient"
 	"hospital-system/server/models"
+	"time"
 )
 
 type ServiceImpl struct {
@@ -77,8 +78,8 @@ func (service *ServiceImpl) GetPatient(id string) (*Patient, error) {
 		MedicalRecordNumber:          patient.MedicalRecordNumber,
 		Email:                        patient.Email,
 		PhoneNumber:                  patient.PhoneNumber,
-		Admissions: lo.Map(admissions, func(admission models.Admission, _ int) Admission {
-			return Admission{
+		Admissions: lo.Map(admissions, func(admission models.Admission, _ int) AdmissionDetails {
+			return AdmissionDetails{
 				ID:        admission.ID,
 				StartTime: admission.StartTime,
 				EndTime:   admission.EndTime,
@@ -99,24 +100,18 @@ func (service *ServiceImpl) GetPatientName(id uuid.UUID) (string, error) {
 	return fmt.Sprintf("%s, %s", patient.Lastname, patient.Firstname), nil
 }
 
-func (service *ServiceImpl) RegisterPatientAdmission(patientId uuid.UUID, admission Admission) error {
-	medicationsMarshalled, stdErr := json.Marshal(admission.Medications)
+func (service *ServiceImpl) RegisterPatientAdmission(patientId uuid.UUID, admission AdmissionDetails) error {
+	marshalledAnamnesis, stdErr := json.Marshal(admission.Anamnesis)
 	if stdErr != nil {
-		slog.Error("Failed to marshal medications")
-		return stdErr
-	}
-
-	allergiesMarshalled, stdErr := json.Marshal(admission.Allergies)
-	if stdErr != nil {
-		slog.Error("Failed to marshal allergies")
+		slog.Error("Failed to marshal intake info")
 		return stdErr
 	}
 
 	result, err := service.admissionRepo.Insert(models.Admission{
-		PatientID:   patientId,
-		Symptoms:    admission.Symptoms,
-		Medications: medicationsMarshalled,
-		Allergies:   allergiesMarshalled,
+		ID:        uuid.New(),
+		StartTime: time.Now(),
+		Anamnesis: marshalledAnamnesis,
+		PatientID: patientId,
 	})
 	if err != nil {
 		return err
@@ -129,9 +124,9 @@ func (service *ServiceImpl) RegisterPatientAdmission(patientId uuid.UUID, admiss
 	})
 	if err != nil {
 		slog.Error("Failed to add resource to team", err)
-		err = service.admissionRepo.Delete(result.ID)
-		if err != nil {
-			slog.Error("Failed to delete admission", err)
+		deleteErr := service.admissionRepo.Delete(result.ID)
+		if deleteErr != nil {
+			slog.Error("Failed to delete admission with id: ", admission.ID, err)
 			return err
 		}
 
@@ -141,7 +136,7 @@ func (service *ServiceImpl) RegisterPatientAdmission(patientId uuid.UUID, admiss
 	return nil
 }
 
-func (service *ServiceImpl) GetAdmissionsByStatuses(statuses []string) ([]Admission, error) {
+func (service *ServiceImpl) GetAdmissionsByStatuses(statuses []string) ([]AdmissionDetails, error) {
 	admissions, err := service.admissionRepo.GetByStatuses(statuses)
 	if err != nil {
 		return nil, err
@@ -157,17 +152,25 @@ func (service *ServiceImpl) GetAdmissionsByStatuses(statuses []string) ([]Admiss
 		return nil, err
 	}
 
-	return lo.Map(admissions, func(a models.Admission, _ int) Admission {
-		return Admission{
-			ID:          a.ID,
-			StartTime:   a.StartTime,
-			EndTime:     a.EndTime,
-			Status:      a.Status,
-			Symptoms:    a.Symptoms,
-			Medications: []string{},
-			Allergies:   []string{},
-			Diagnosis:   a.Diagnosis,
-			PatientID:   a.PatientID,
+	return lo.Map(admissions, func(a models.Admission, _ int) AdmissionDetails {
+		patient, err := service.patientRepo.Get(a.PatientID)
+		if err != nil {
+			return AdmissionDetails{}
+		}
+
+		return AdmissionDetails{
+			ID:        a.ID,
+			StartTime: a.StartTime,
+			Status:    a.Status,
+			Patient: Patient{
+				ID:                           patient.ID,
+				Firstname:                    patient.Firstname,
+				Lastname:                     patient.Lastname,
+				NationalIdentificationNumber: patient.NationalIdentificationNumber,
+				MedicalRecordNumber:          patient.MedicalRecordNumber,
+				Email:                        patient.Email,
+				PhoneNumber:                  patient.PhoneNumber,
+			},
 			Department: lo.FindOrElse(resources.GetResources(), &authorization.Resource{}, func(item *authorization.Resource) bool {
 				return item.Id == a.ID.String()
 			}).Team.DisplayName,
@@ -178,32 +181,142 @@ func (service *ServiceImpl) GetAdmissionsByStatuses(statuses []string) ([]Admiss
 	}), nil
 }
 
-func (service *ServiceImpl) Discharge(admissionId uuid.UUID) error {
-	admission, err := service.admissionRepo.Get(admissionId)
+func (service *ServiceImpl) GetAdmission(id uuid.UUID) (*AdmissionDetails, error) {
+	admission, err := service.admissionRepo.Get(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if admission == nil {
-		return nil
+		return nil, nil
 	}
 
-	admission.Status = models.StatusDischarged
-
-	_, err = service.admissionRepo.Update(admission)
+	resources, err := service.authorizationClient.GetResources(context.Background(), &authorization.GetResourcesRequest{
+		Ids: []string{admission.ID.String()},
+	})
 	if err != nil {
-		return err
+		slog.Error("Failed to get resources", err)
+		return nil, err
 	}
 
-	//// TODO: Handle on authorization side, update resource to archived
-	//err = service.authorizationClient.ArchiveResource(context.Background(), &authorization.ArchiveResourceRequest{
-	//	Id: admissionId.String(),
-	//})
-	if _, err = service.authorizationClient.ArchiveResource(context.Background(), &authorization.ArchiveResourceRequest{
-		Id: admissionId.String(),
-	}); err != nil {
-		slog.Error("Failed to remove resource from authorization", err)
-		return err
+	patient, err := service.patientRepo.Get(admission.PatientID)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &AdmissionDetails{
+		ID:        admission.ID,
+		StartTime: admission.StartTime,
+		Status:    admission.Status,
+		Patient: Patient{
+			ID: patient.ID,
+		},
+		Department: lo.FindOrElse(resources.GetResources(), &authorization.Resource{}, func(item *authorization.Resource) bool {
+			return item.Id == admission.ID.String()
+		}).Team.DisplayName,
+		Physician: uuid.MustParse(lo.FindOrElse(resources.GetResources(), &authorization.Resource{}, func(item *authorization.Resource) bool {
+			return item.Id == admission.ID.String()
+		}).TeamLead),
+	}, nil
+}
+
+func (service *ServiceImpl) GetActiveAdmissionsByPhysician(physicianId uuid.UUID) ([]AdmissionDetails, error) {
+	resources, err := service.authorizationClient.GetActorResources(context.Background(), &authorization.GetActorResourcesRequest{
+		ActorId:  physicianId.String(),
+		Archived: false,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	admissions, err := service.admissionRepo.GetByIDs(lo.Map(resources.GetResources(), func(resource *authorization.Resource, _ int) uuid.UUID {
+		return uuid.MustParse(resource.Id)
+	}))
+	if err != nil {
+		return nil, err
+	}
+
+	resultAdmissions := make([]AdmissionDetails, len(admissions))
+	for _, a := range admissions {
+		var anamnesis Anamnesis
+		if err := json.Unmarshal(a.Anamnesis, &anamnesis); err != nil {
+			slog.Error("Failed to unmarshal anamnesis", err)
+			return nil, err
+		}
+
+		var vitals Vitals
+		if err := json.Unmarshal(a.Vitals, &vitals); err != nil {
+			slog.Error("Failed to unmarshal vitals", err)
+			return nil, err
+		}
+
+		var medications *[]MedicationInfo
+		if err := json.Unmarshal(a.Medications, &medications); err != nil {
+			slog.Error("Failed to unmarshal medications", err)
+			return nil, err
+		}
+
+		var logs []Log
+		if err := json.Unmarshal(a.Logs, &logs); err != nil {
+			slog.Error("Failed to unmarshal logs", err)
+			return nil, err
+		}
+
+		labs, err := service.admissionRepo.GetLabsByAdmissionID(a.ID)
+		if err != nil {
+			slog.Error("Failed to get labs", err)
+			return nil, err
+		}
+
+		labResults := make([]Lab, len(labs))
+		for _, lab := range labs {
+			var test *[]LabTest
+			if err := json.Unmarshal(lab.TestResults, &test); err != nil {
+				slog.Error("Failed to unmarshal lab test results", err)
+				return nil, err
+			}
+
+			labResults = append(labResults, Lab{
+				ID:          lab.ID,
+				RequestedAt: lab.RequestedAt,
+				ProcessedAt: lab.ProcessedAt,
+				TestType:    lab.TestType,
+				TestResults: test,
+			})
+		}
+
+		patient, err := service.patientRepo.Get(a.PatientID)
+		if err != nil {
+			return nil, err
+		}
+
+		resultAdmissions = append(resultAdmissions, AdmissionDetails{
+			ID:          a.ID,
+			StartTime:   a.StartTime,
+			EndTime:     a.EndTime,
+			Status:      a.Status,
+			Anamnesis:   anamnesis,
+			Vitals:      vitals,
+			Diagnosis:   a.Diagnosis,
+			Medications: medications,
+			Labs:        &labResults,
+			Logs:        logs,
+			Patient: Patient{
+				ID:                           patient.ID,
+				Firstname:                    patient.Firstname,
+				Lastname:                     patient.Lastname,
+				NationalIdentificationNumber: patient.NationalIdentificationNumber,
+				MedicalRecordNumber:          patient.MedicalRecordNumber,
+				Email:                        patient.Email,
+				PhoneNumber:                  patient.PhoneNumber,
+			},
+			Department: lo.FindOrElse(resources.GetResources(), &authorization.Resource{}, func(item *authorization.Resource) bool {
+				return item.Id == a.ID.String()
+			}).Team.DisplayName,
+			Physician: uuid.MustParse(lo.FindOrElse(resources.GetResources(), &authorization.Resource{}, func(item *authorization.Resource) bool {
+				return item.Id == a.ID.String()
+			}).TeamLead),
+		})
+	}
+
+	return resultAdmissions, nil
 }

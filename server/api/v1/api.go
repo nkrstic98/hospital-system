@@ -42,11 +42,6 @@ func (api *API) authMiddleware(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Fetch the Authorization header
 		tokenString := c.GetHeader(AuthorizationCookieName)
-		//if err != nil {
-		//	c.JSON(http.StatusUnauthorized, gin.H{"error": Authorization_MissingHeaderErr})
-		//	c.Abort()
-		//	return
-		//}
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": Authorization_MissingTokenErr})
 			c.Abort()
@@ -68,11 +63,12 @@ func (api *API) authMiddleware(role string) gin.HandlerFunc {
 		}
 
 		// If user is not authorized to access certain resource, return status forbidden
-		if claims.Role != role {
-			c.JSON(http.StatusForbidden, gin.H{"error": Authorization_UserForbiddenError})
-			c.Abort()
-			return
-		}
+		// TODO: Handle role-based access control
+		//if claims.Role != role {
+		//	c.JSON(http.StatusForbidden, gin.H{"error": Authorization_UserForbiddenError})
+		//	c.Abort()
+		//	return
+		//}
 
 		// Refresh the session
 		if err = api.sessionService.RefreshSession(tokenString); err != nil {
