@@ -1,3 +1,5 @@
+import {User} from "../../types/User.ts";
+
 export interface LoginRequest {
     username: string;
     password: string;
@@ -5,7 +7,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
     token: string;
-    user: UserResponse | undefined;
+    user: User | undefined;
 }
 
 export interface ValidateSessionRequest {
@@ -13,20 +15,9 @@ export interface ValidateSessionRequest {
 }
 
 export interface ValidateSessionResponse {
-    user: UserResponse | undefined;
+    user: User | undefined;
 }
 
 export interface LogoutRequest {
     token: string;
-}
-
-export interface UserResponse {
-    firstname:   string;
-    lastname:    string;
-    national_identification_number: string;
-    username: string;
-    email: string;
-    role:        string;
-    team:        string | null;
-    permissions: Map<string, string> | null;
 }

@@ -1,4 +1,4 @@
-package patient
+package constants
 
 import "hospital-system/server/app/dto"
 

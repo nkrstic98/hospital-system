@@ -1,20 +1,24 @@
+import {User} from "../../types/User.ts";
+
 export interface RegisterUserRequest {
     firstname: string;
     lastname: string;
-    national_identification_number: string;
+    nationalIdentificationNumber: string;
     email: string;
-    joining_date: Date;
     role: string;
     team: string | undefined;
 }
 
-export interface UserResponse {
-    firstname:   string;
-    lastname:    string;
-    national_identification_number: string;
-    username: string;
-    email: string;
-    role:        string;
-    team:        string | null;
-    permissions: Map<string, string> | null;
+export interface GetDepartments {
+    team: string | undefined;
+    role: string | undefined;
+}
+
+export interface GetDepartmentsResponse {
+    departments: Map<string, Department>;
+}
+
+export interface Department {
+    displayName: string;
+    users: User[];
 }

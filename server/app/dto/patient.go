@@ -26,7 +26,6 @@ type AdmitPatientRequest struct {
 	FamilyHistory           string    `json:"family_history"`
 	SocialHistory           string    `json:"social_history"`
 	PhysicalExamination     string    `json:"physical_examination"`
-	// TODO: Add vitals check
 }
 
 type Patient struct {
@@ -43,8 +42,8 @@ type Patient struct {
 
 type Admission struct {
 	ID         uuid.UUID `json:"id"`
-	StartTime  time.Time `json:"start_time"`
-	EndTime    time.Time `json:"end_time"`
+	StartTime  time.Time `json:"startTime"`
+	EndTime    time.Time `json:"endTime"`
 	Status     string    `json:"status"`
 	Patient    string    `json:"patient"`
 	Department string    `json:"department"`
@@ -100,10 +99,10 @@ type MedicationInfo struct {
 
 type Log struct {
 	Timestamp   time.Time `json:"timestamp"`
-	Message     string    `json:"message"`
 	Action      string    `json:"action"`
+	Message     string    `json:"message"`
 	Details     string    `json:"details"`
-	PerformedBy string    `json:"performed_by"`
+	PerformedBy uuid.UUID `json:"performed_by"`
 }
 
 type LabTest struct {

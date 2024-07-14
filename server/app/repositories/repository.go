@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"hospital-system/server/models"
@@ -8,28 +9,28 @@ import (
 
 type Repository interface {
 	// Users
-	InsertUser(user models.User) error
-	GetUser(id uuid.UUID) (*models.User, error)
-	GetUserByUsername(username string) (*models.User, error)
-	GetUserByIDs(ids []uuid.UUID) ([]models.User, error)
-	GetAllUsers() ([]models.User, error)
-	DeleteUser(id uuid.UUID) error
+	InsertUser(ctx context.Context, user models.User) (*uuid.UUID, error)
+	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
+	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
+	GetUsersByIDs(ctx context.Context, ids []uuid.UUID) ([]models.User, error)
+	GetAllUsers(ctx context.Context) ([]models.User, error)
+	DeleteUser(ctx context.Context, id uuid.UUID) error
 
 	// Patients
-	InsertPatient(user models.Patient) (*models.Patient, error)
-	GetPatient(id uuid.UUID) (*models.Patient, error)
-	GetPatientByPersonalID(personalID string) (*models.Patient, error)
+	InsertPatient(ctx context.Context, user models.Patient) (*models.Patient, error)
+	GetPatient(ctx context.Context, id uuid.UUID) (*models.Patient, error)
+	GetPatientByPersonalID(ctx context.Context, personalID string) (*models.Patient, error)
 
 	// Admissions
-	InsertAdmission(admission models.Admission) (*models.Admission, error)
-	GetAdmission(id uuid.UUID) (*models.Admission, error)
-	DeleteAdmission(id uuid.UUID) error
-	GetAdmissionsByPatientId(id uuid.UUID) ([]models.Admission, error)
-	GetAdmissionsByStatuses(statuses []string) ([]models.Admission, error)
-	GetAdmissionsByIDs(ids []uuid.UUID) ([]models.Admission, error)
+	InsertAdmission(ctx context.Context, admission models.Admission) (*models.Admission, error)
+	GetAdmission(ctx context.Context, id uuid.UUID) (*models.Admission, error)
+	DeleteAdmission(ctx context.Context, id uuid.UUID) error
+	GetAdmissionsByPatientId(ctx context.Context, id uuid.UUID) ([]models.Admission, error)
+	GetAdmissionsByStatuses(ctx context.Context, statuses []string) ([]models.Admission, error)
+	GetAdmissionsByIDs(ctx context.Context, ids []uuid.UUID) ([]models.Admission, error)
 
 	// Labs
-	GetLabsByAdmissionID(admissionID uuid.UUID) ([]models.Lab, error)
+	GetLabsByAdmissionID(ctx context.Context, admissionID uuid.UUID) ([]models.Lab, error)
 }
 
 type RepositoryImpl struct {

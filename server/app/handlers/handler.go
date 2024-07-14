@@ -2,34 +2,28 @@ package handlers
 
 import (
 	"go.uber.org/zap"
-	"hospital-system/server/app/services/department"
-	"hospital-system/server/app/services/patient"
-	"hospital-system/server/app/services/session"
-	"hospital-system/server/app/services/user"
+	"hospital-system/server/app/services"
 )
 
 const AuthorizationCookieName = "Authorization"
 
 type Handler struct {
-	log               *zap.Logger
-	userService       user.Service
-	sessionService    session.Service
-	patientService    patient.Service
-	departmentService department.Service
+	log            *zap.Logger
+	userService    *services.UserService
+	sessionService *services.SessionService
+	patientService *services.PatientService
 }
 
 func NewHandler(
 	log *zap.Logger,
-	userService user.Service,
-	sessionService session.Service,
-	patientService patient.Service,
-	departmentService department.Service,
+	userService *services.UserService,
+	sessionService *services.SessionService,
+	patientService *services.PatientService,
 ) *Handler {
 	return &Handler{
-		log:               log,
-		userService:       userService,
-		sessionService:    sessionService,
-		patientService:    patientService,
-		departmentService: departmentService,
+		log:            log,
+		userService:    userService,
+		sessionService: sessionService,
+		patientService: patientService,
 	}
 }

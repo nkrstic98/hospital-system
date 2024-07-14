@@ -1,8 +1,9 @@
-import {Department, Employee} from "../../services/department/types.ts";
 import Typography from "@mui/material/Typography";
 import {FormControl, FormHelperText, InputLabel, OutlinedInput, Select} from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import {useState} from "react";
+import {User} from "../../types/User.ts";
+import {Department} from "../../services/user/types.ts";
 
 export interface DepartmentAdPhysiciansProps {
     departmentPhysicians: Map<string, Department> | undefined;
@@ -61,9 +62,9 @@ const DepartmentsAndPhysicians = ({
                     value={doctor}
                     onChange={(e) => {
                         setDoctor(e.target.value as string);
-                        const physician: Employee = JSON.parse(e.target.value);
+                        const physician: User = JSON.parse(e.target.value);
                         setPhysicianId(physician.id);
-                        setPhysicianName(physician.fullName);
+                        setPhysicianName(physician.firstname + " " + physician.lastname);
                     }}
                     input={<OutlinedInput label="Physician" />}
                     required
@@ -72,8 +73,8 @@ const DepartmentsAndPhysicians = ({
                 >
                     {
                         departmentPhysicians !== undefined &&
-                        departmentPhysicians.get(department)?.physicians.map((p) => (
-                            <MenuItem key={p.id} value={JSON.stringify(p)}>{p.fullName}</MenuItem>
+                        departmentPhysicians.get(department)?.users.map((p) => (
+                            <MenuItem key={p.nationalIdentificationNumber} value={JSON.stringify(p)}>{p.firstname} {p.lastname}</MenuItem>
                         ))
                     }
                     {

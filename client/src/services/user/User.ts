@@ -1,6 +1,6 @@
 import {GetAuthorizationToken} from "../../utils/utils.ts";
 import {User} from "../../types/User.ts";
-import {RegisterUserRequest, UserResponse} from "./types.ts";
+import {Department, GetDepartmentsResponse, GetDepartments, RegisterUserRequest} from "./types.ts";
 
 export class UserService {
     private readonly baseUrl: string;
@@ -46,21 +46,33 @@ export class UserService {
             }
 
             const responseBody = await response.text();
-            const data = JSON.parse(responseBody) as UserResponse[];
-            return data.map(user => {
-                return {
-                    firstname: user.firstname,
-                    lastname: user.lastname,
-                    nationalIdentificationNumber: user.national_identification_number,
-                    username: user.username,
-                    email: user.email,
-                    role: user.role,
-                    team: user.team,
-                    permissions: user.permissions,
-                }
-            });
+            return JSON.parse(responseBody) as User[];
         } catch (error) {
             console.error("Failed to get users:", error);
+        }
+    }
+
+    async GetDepartments(request: GetDepartments): Promise<Map<string, Department> | undefined> {
+        try {
+            const response = await fetch(`${this.baseUrl}/departments`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": GetAuthorizationToken(),
+                },
+                body: JSON.stringify(request),
+            })
+
+            if(!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const responseBody = await response.text();
+            const data = JSON.parse(responseBody) as GetDepartmentsResponse;
+            return new Map<string, Department>(Object.entries(data.departments));
+        } catch (error) {
+            console.error("Failed to get departments:", error);
+            return undefined;
         }
     }
 }

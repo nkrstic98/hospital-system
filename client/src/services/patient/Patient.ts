@@ -94,11 +94,7 @@ export class PatientService {
             }
 
             const responseBody = await response.text();
-            const data = JSON.parse(responseBody) as Admission[];
-
-            return data.sort((a, b) => {
-                return  new Date(b.admissionTime) > new Date(a.admissionTime) ? 1 : -1;
-            });
+            return JSON.parse(responseBody) as Admission[];
         } catch (error) {
             console.error("Failed to get patient admissions:", error);
             return undefined;

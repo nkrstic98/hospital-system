@@ -12,14 +12,13 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 
 	router.POST(path("users"), h.rbacAuthMiddleware("EMPLOYEES", "WRITE"), h.registerUser)
 	router.GET(path("users"), h.rbacAuthMiddleware("EMPLOYEES", "%"), h.getUsers)
+	router.POST(path("users/departments"), h.basicAuthMiddleware(), h.getDepartments)
 
 	router.POST(path("patients"), h.rbacAuthMiddleware("INTAKE", "WRITE"), h.registerPatient)
 	router.GET(path("patients/:id"), h.rbacAuthMiddleware("PATIENTS", "READ"), h.getPatient)
 
 	router.POST(path("patients/admissions/register"), h.rbacAuthMiddleware("INTAKE", "WRITE"), h.admitPatient)
-	router.GET(path("patients/admissions"), h.rbacAuthMiddleware("INTAKE", "READ"), h.getAdmissions)
-
-	router.GET(path("departments"), h.basicAuthMiddleware(), h.getDepartments)
+	router.GET(path("patients/admissions"), h.rbacAuthMiddleware("INTAKE", "READ"), h.getActiveAdmissions)
 }
 
 func path(endpoint string) string {

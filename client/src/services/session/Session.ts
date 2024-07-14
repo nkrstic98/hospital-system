@@ -30,16 +30,7 @@ export class SessionService {
                 return undefined;
             }
 
-            return {
-                firstname: data.user.firstname,
-                lastname: data.user.lastname,
-                nationalIdentificationNumber: data.user.national_identification_number,
-                username: data.user.username,
-                email: data.user.email,
-                role: data.user.role,
-                team: data.user.team,
-                permissions: data.user.permissions,
-            };
+            return data.user;
         } catch (error) {
             console.error("Failed to login:", error);
         }
@@ -66,16 +57,7 @@ export class SessionService {
                 return undefined;
             }
 
-            return {
-                firstname: data.user.firstname,
-                lastname: data.user.lastname,
-                nationalIdentificationNumber: data.user.national_identification_number,
-                username: data.user.username,
-                email: data.user.email,
-                role: data.user.role,
-                team: data.user.team,
-                permissions: data.user.permissions,
-            };
+            return data.user;
         } catch (error) {
             console.error("Failed to validate:", error);
         }

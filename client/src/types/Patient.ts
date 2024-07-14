@@ -8,5 +8,5 @@ export interface Patient {
     medicalRecordNumber: string;
     email: string;
     phoneNumber: string;
-    admissions: Array<Admission>;
+    admissions: Array<Admission> | null;
 }

@@ -18,9 +18,9 @@ import PatientAllergies from "./PatientAllergies.tsx";
 import PatientMedications from "./PatientMedications.tsx";
 import TextInput from "./TextInput.tsx";
 import DepartmentsAndPhysicians from "./DepartmentsAndPhysicians.tsx";
-import {Department} from "../../services/department/types.ts";
 import {useNavigate} from "react-router-dom";
-import {DepartmentService} from "../../services/department/Department.ts";
+import {UserService} from "../../services/user/User.ts";
+import {Department} from "../../services/user/types.ts";
 
 const style = {
     position: 'absolute' as const,
@@ -101,7 +101,7 @@ export default function PatientAdmissionStepper() {
     const navigate = useNavigate();
 
     const patientService = new PatientService();
-    const departmentService = new DepartmentService();
+    const userService = new UserService();
 
     const [patientId, setPatientId] = useState("");
     const [findPatientAttempted, setFindPatientAttempted] = useState(false);
@@ -325,12 +325,14 @@ export default function PatientAdmissionStepper() {
 
         patientService.GetPatient(patientId).then(r => {
             if (r !== undefined) {
-                const activeAdmissions  = r.admissions.filter(
-                    (admission) => admission.status === "admitted" || admission.status === "pending"
-                );
-                if (activeAdmissions.length > 0) {
-                    setPatientAdmitted(true);
-                    return;
+                if (r.admissions !== null) {
+                    const activeAdmissions  = r.admissions.filter(
+                        (admission) => admission.status === "admitted" || admission.status === "pending"
+                    );
+                    if (activeAdmissions.length > 0) {
+                        setPatientAdmitted(true);
+                        return;
+                    }
                 }
             }
 
@@ -415,7 +417,10 @@ export default function PatientAdmissionStepper() {
     }
 
     useEffect(() => {
-        departmentService.GetDepartments().then((data) => {
+        userService.GetDepartments({
+            team: undefined,
+            role: "ATTENDING"
+        }).then((data) => {
             setDepartmentPhysicians(data);
         });
     }, []);

@@ -57,9 +57,7 @@ const PatientIntake = ({ section }: PatientIntakeProps) => {
     }, [isAuthenticated, section, user]);
 
     useEffect(() => {
-        patientService.GetActiveAdmissions({
-            statuses: ["pending", "admitted"]
-        }).then((admissions) => {
+        patientService.GetActiveAdmissions().then((admissions) => {
             if(admissions) {
                 setAdmissions(admissions);
             }
@@ -98,7 +96,7 @@ const PatientIntake = ({ section }: PatientIntakeProps) => {
                                     <TableCell align="center">{a.patient}</TableCell>
                                     <TableCell align="center">{a.department}</TableCell>
                                     <TableCell align="center">{a.physician}</TableCell>
-                                    <TableCell align="center">{getAdmissionTime(a.admissionTime)}</TableCell>
+                                    <TableCell align="center">{getAdmissionTime(a.startTime)}</TableCell>
                                     <TableCell align="center">
                                         {
                                             a.status === "pending" ?

@@ -49,7 +49,7 @@ function ResponsiveAppBar() {
                             style={{width: '50px', height: '50px'}}
                         />
                         <Typography
-                            variant="h6"
+                            variant="h5"
                             noWrap
                             component="div"
                             sx={{
@@ -80,7 +80,7 @@ function ResponsiveAppBar() {
                                 mr: 2,
                                 display: { xs: 'flex', md: 'none' },
                                 flexGrow: 1,
-                                fontWeight: 700,
+                                fontWeight: 1000,
                                 letterSpacing: '.3rem',
                                 color: 'inherit',
                                 textDecoration: 'none',

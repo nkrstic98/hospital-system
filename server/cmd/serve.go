@@ -16,11 +16,18 @@ var serveCmd = &cobra.Command{
 	Short: "Starts server",
 	Long:  "Starts server",
 	Run: func(cmd *cobra.Command, args []string) {
-		app, _, err := app.Build(*cfg)
+		app, cleanup, err := app.Build(*cfg)
 		if err != nil {
 			panic(err)
 		}
-		defer db.CloseConnection()
+		defer func() {
+			err := db.CloseConnection()
+			if err != nil {
+				panic(fmt.Errorf("failed to close database connection: %w", err))
+			}
+
+			cleanup()
+		}()
 
 		addr := fmt.Sprintf("%v:%v", cfg.Web.Host, cfg.Web.Port)
 		slog.Info(fmt.Sprintf("Starting http server on port %v", cfg.Web.Port))

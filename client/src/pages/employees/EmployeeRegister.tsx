@@ -124,15 +124,7 @@ const EmployeeRegister = ()=> {
         }
 
         setSubmitAttempted(false);
-        userService.Register({
-            firstname: form.firstname,
-            lastname: form.lastname,
-            national_identification_number: form.nationalIdentificationNumber,
-            email: form.email,
-            role: form.role,
-            team: form.team,
-            joining_date: new Date(),
-        }).then(r => {
+        userService.Register(form).then(r => {
             if (!r) {
                 setError(true);
             }

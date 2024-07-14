@@ -20,12 +20,3 @@ export interface RegisterPatientAdmissionRequest {
     social_history: string;
     physical_examination: string;
 }
-
-export interface GetAdmissionsRequest {
-    statuses: string[];
-}
-
-export interface GetActiveAdmissionsByUserRequest {
-    userId: string;
-    statuses: string[];
-}

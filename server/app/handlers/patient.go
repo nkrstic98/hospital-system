@@ -12,15 +12,15 @@ const (
 	Patients_Get_PatientNotFound  = "patient_not_found"
 )
 
-func (h *Handler) registerPatient(c *gin.Context) {
+func (h *Handler) registerPatient(ctx *gin.Context) {
 	var request dto.RegisterPatientRequest
-	if err := c.BindJSON(&request); err != nil {
+	if err := ctx.BindJSON(&request); err != nil {
 		h.log.Error("Failed to bind json", zap.Error(err))
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	result, err := h.patientService.RegisterPatient(dto.Patient{
+	result, err := h.patientService.RegisterPatient(ctx, dto.Patient{
 		Firstname:                    request.Firstname,
 		Lastname:                     request.Lastname,
 		NationalIdentificationNumber: request.NationalIdentificationNumber,
@@ -30,45 +30,45 @@ func (h *Handler) registerPatient(c *gin.Context) {
 	})
 	if err != nil {
 		h.log.Error("Failed to create patient", zap.String("nid", request.NationalIdentificationNumber), zap.Error(err))
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err})
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, result)
+	ctx.IndentedJSON(http.StatusOK, result)
 }
 
-func (h *Handler) getPatient(c *gin.Context) {
-	patientId := c.Param("id")
+func (h *Handler) getPatient(ctx *gin.Context) {
+	patientId := ctx.Param("id")
 	if patientId == "" {
 		h.log.Warn("Get patient called without providing patient id")
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": Patients_Get_MissingPatientID})
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": Patients_Get_MissingPatientID})
 		return
 	}
 
-	result, err := h.patientService.GetPatient(patientId)
+	result, err := h.patientService.GetPatient(ctx, patientId)
 	if err != nil {
 		h.log.Error("Failed to get patient", zap.String("id", patientId), zap.Error(err))
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err})
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": err})
 		return
 	}
 	if result == nil {
 		h.log.Warn("Patient not found", zap.String("id", patientId))
-		c.IndentedJSON(http.StatusNotFound, gin.H{"error": Patients_Get_PatientNotFound})
+		ctx.IndentedJSON(http.StatusNotFound, gin.H{"error": Patients_Get_PatientNotFound})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, result)
+	ctx.IndentedJSON(http.StatusOK, result)
 }
 
-func (h *Handler) admitPatient(c *gin.Context) {
+func (h *Handler) admitPatient(ctx *gin.Context) {
 	var request dto.AdmitPatientRequest
-	if err := c.BindJSON(&request); err != nil {
+	if err := ctx.BindJSON(&request); err != nil {
 		h.log.Error("Failed to bind json", zap.Error(err))
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	if err := h.patientService.RegisterPatientAdmission(request.PatientId, dto.AdmissionDetails{
+	if err := h.patientService.RegisterPatientAdmission(ctx, request.PatientId, dto.AdmissionDetails{
 		Anamnesis: dto.Anamnesis{
 			ChiefComplaint:          request.ChiefComplaint,
 			HistoryOfPresentIllness: request.HistoryOfPresentIllness,
@@ -83,20 +83,20 @@ func (h *Handler) admitPatient(c *gin.Context) {
 		Physician:  request.Physician,
 	}); err != nil {
 		h.log.Error("Failed to admit patient", zap.Any("patient_id", request.PatientId), zap.Error(err))
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err})
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, nil)
+	ctx.IndentedJSON(http.StatusOK, nil)
 }
 
-func (h *Handler) getAdmissions(c *gin.Context) {
-	admissions, err := h.patientService.GetAdmissions()
+func (h *Handler) getActiveAdmissions(ctx *gin.Context) {
+	admissions, err := h.patientService.GetActiveAdmissions(ctx)
 	if err != nil {
 		h.log.Error("Failed to get admissions", zap.Error(err))
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err})
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, admissions)
+	ctx.IndentedJSON(http.StatusOK, admissions)
 }
