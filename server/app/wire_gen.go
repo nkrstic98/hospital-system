@@ -22,9 +22,7 @@ import (
 	"gorm.io/gorm"
 	"hospital-system/proto_gen/authorization/v1"
 	"hospital-system/server/app/handlers"
-	"hospital-system/server/app/repositories/admission"
-	"hospital-system/server/app/repositories/patient"
-	"hospital-system/server/app/repositories/user"
+	"hospital-system/server/app/repositories"
 	"hospital-system/server/app/services/department"
 	patient2 "hospital-system/server/app/services/patient"
 	"hospital-system/server/app/services/session"
@@ -56,10 +54,10 @@ func buildAPI(db2 *gorm.DB, cfg config.Config, redisClient *redis.Client, userCl
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
-	repositoryImpl := user.NewRepository(db2)
+	repositoryImpl := repositories.NewRepository(db2)
 	serviceImpl := user2.NewService(userClient, repositoryImpl)
-	patientRepositoryImpl := patient.NewRepository(db2)
-	admissionRepositoryImpl := admission.NewRepository(db2)
+	patientRepositoryImpl := repositories.NewRepository(db2)
+	admissionRepositoryImpl := repositories.NewRepository(db2)
 	patientServiceImpl := patient2.NewService(userClient, patientRepositoryImpl, admissionRepositoryImpl, serviceImpl)
 	departmentServiceImpl := department.NewService(userClient, repositoryImpl)
 	sessionServiceImpl := session.NewService(redisClient, cfg)

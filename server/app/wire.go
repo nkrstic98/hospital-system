@@ -21,6 +21,7 @@ import (
 	api_v1 "hospital-system/server/api/v1"
 	admin_handler "hospital-system/server/api/v1/admin"
 	session_handler "hospital-system/server/api/v1/session"
+	"hospital-system/server/app/repositories"
 	admission_repo "hospital-system/server/app/repositories/admission"
 	patient_repo "hospital-system/server/app/repositories/patient"
 	user_repo "hospital-system/server/app/repositories/user"
@@ -64,9 +65,9 @@ func buildAPI(
 	userClient authorization.AuthorizationServiceClient,
 ) *api_v1.API {
 	panic(wire.Build(
-		wire.Bind(new(user_repo.Repository), new(*user_repo.RepositoryImpl)), user_repo.NewRepository,
-		wire.Bind(new(patient_repo.Repository), new(*patient_repo.RepositoryImpl)), patient_repo.NewRepository,
-		wire.Bind(new(admission_repo.Repository), new(*admission_repo.RepositoryImpl)), admission_repo.NewRepository,
+		wire.Bind(new(user_repo.Repository), new(*repositories.RepositoryImpl)), repositories.NewRepository,
+		wire.Bind(new(patient_repo.Repository), new(*repositories.RepositoryImpl)), repositories.NewRepository,
+		wire.Bind(new(admission_repo.Repository), new(*repositories.RepositoryImpl)), repositories.NewRepository,
 		wire.Bind(new(user_service.Service), new(*user_service.ServiceImpl)), user_service.NewService,
 		wire.Bind(new(session_service.Service), new(*session_service.ServiceImpl)), session_service.NewService,
 		wire.Bind(new(patient_service.Service), new(*patient_service.ServiceImpl)), patient_service.NewService,

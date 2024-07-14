@@ -7,7 +7,7 @@ import (
 )
 
 type Lab struct {
-	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ID          uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
 	RequestedAt time.Time `gorm:"not null"`
 	ProcessedAt time.Time `gorm:"default:null"`
 

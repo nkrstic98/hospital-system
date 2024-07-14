@@ -13,9 +13,9 @@ const (
 )
 
 type Admission struct {
-	ID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ID uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
 
-	StartTime time.Time `gorm:"not null"`
+	StartTime time.Time `gorm:"not null;default:CURRENT_TIMESTAMP"`
 	EndTime   time.Time `gorm:"default:null"`
 	Status    string    `gorm:"not null;default:'pending'"`
 
