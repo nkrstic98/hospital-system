@@ -3,6 +3,14 @@ package app
 import (
 	"context"
 	"fmt"
+	"hospital-system/proto_gen/authorization/v1"
+	"hospital-system/server/app/handlers"
+	"hospital-system/server/app/repositories"
+	"hospital-system/server/app/services"
+	"hospital-system/server/config"
+	"hospital-system/server/db"
+	"time"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/contrib/registry/consul/v2"
@@ -12,13 +20,6 @@ import (
 	consulapi "github.com/hashicorp/consul/api"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"hospital-system/proto_gen/authorization/v1"
-	"hospital-system/server/app/handlers"
-	"hospital-system/server/app/repositories"
-	"hospital-system/server/app/services"
-	"hospital-system/server/config"
-	"hospital-system/server/db"
-	"time"
 )
 
 func Build(cfg config.Config) (*gin.Engine, func(), error) {

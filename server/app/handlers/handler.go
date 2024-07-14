@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"go.uber.org/zap"
 	"hospital-system/server/app/services"
+
+	"go.uber.org/zap"
 )
 
 const AuthorizationCookieName = "Authorization"

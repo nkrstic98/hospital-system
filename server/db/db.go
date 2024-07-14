@@ -2,10 +2,11 @@ package db
 
 import (
 	"fmt"
+	"hospital-system/server/config"
+
 	"golang.org/x/exp/slog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"hospital-system/server/config"
 )
 
 var DB *gorm.DB

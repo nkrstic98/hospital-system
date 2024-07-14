@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"encoding/json"
 	"github.com/google/uuid"
 )
@@ -11,5 +12,5 @@ type Resource struct {
 	TeamLead        uuid.UUID       `gorm:"type:uuid;not null"`
 	TeamAssignments json.RawMessage `gorm:"not null;type:jsonb"`
 	Journey         json.RawMessage `gorm:"default:null;type:jsonb"`
-	Archived        *bool           `gorm:"default:null"`
+	Archived        sql.NullBool    `gorm:"default:null"`
 }

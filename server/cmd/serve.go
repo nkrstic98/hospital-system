@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"golang.org/x/exp/slog"
 	"hospital-system/server/app"
 	"hospital-system/server/db"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/spf13/cobra"
+	"golang.org/x/exp/slog"
 )
 
 var serveCmd = &cobra.Command{

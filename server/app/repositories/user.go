@@ -3,10 +3,11 @@ package repositories
 import (
 	"context"
 	"errors"
+	"hospital-system/server/models"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"hospital-system/server/models"
 )
 
 func (repo *RepositoryImpl) InsertUser(ctx context.Context, user models.User) (*uuid.UUID, error) {

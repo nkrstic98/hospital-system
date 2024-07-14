@@ -2,11 +2,12 @@ package db
 
 import (
 	"fmt"
+	"hospital-system/server/models"
+	"hospital-system/server/utils"
+
 	"github.com/google/uuid"
 	"golang.org/x/exp/slog"
 	"gorm.io/gorm"
-	"hospital-system/server/models"
-	"hospital-system/server/utils"
 )
 
 func ReinitDatabase() error {

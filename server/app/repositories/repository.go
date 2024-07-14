@@ -2,9 +2,10 @@ package repositories
 
 import (
 	"context"
+	"hospital-system/server/models"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"hospital-system/server/models"
 )
 
 type Repository interface {

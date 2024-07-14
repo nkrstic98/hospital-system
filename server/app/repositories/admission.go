@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 
+	"hospital-system/server/models"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"hospital-system/server/models"
 )
 
 func (repo *RepositoryImpl) InsertAdmission(ctx context.Context, admission models.Admission) (*models.Admission, error) {

@@ -3,13 +3,14 @@ package services
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/samber/lo"
-	"go.uber.org/zap"
 	"hospital-system/proto_gen/authorization/v1"
 	"hospital-system/server/app/dto"
 	"hospital-system/server/models"
 	"hospital-system/server/utils"
+
+	"github.com/google/uuid"
+	"github.com/samber/lo"
+	"go.uber.org/zap"
 )
 
 type userRepo interface {

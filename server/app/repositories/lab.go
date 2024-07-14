@@ -6,8 +6,9 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/google/uuid"
 	"hospital-system/server/models"
+
+	"github.com/google/uuid"
 )
 
 func (repo *RepositoryImpl) GetLabsByAdmissionID(ctx context.Context, admissionID uuid.UUID) ([]models.Lab, error) {

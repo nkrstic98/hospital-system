@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"hospital-system/server/app/dto"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
-	"hospital-system/server/app/dto"
-	"net/http"
 )
 
 const (

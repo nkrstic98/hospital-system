@@ -3,12 +3,13 @@ package services
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/samber/lo"
 	"hospital-system/proto_gen/authorization/v1"
 	"hospital-system/server/app/dto"
 	"hospital-system/server/models"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/samber/lo"
 )
 
 type patientRepo interface {

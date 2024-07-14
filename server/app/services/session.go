@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/go-redis/redis/v8"
-	"github.com/golang-jwt/jwt/v5"
 	"hospital-system/server/app/dto"
 	"hospital-system/server/config"
 	"time"
+
+	"github.com/go-redis/redis/v8"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type SessionService struct {

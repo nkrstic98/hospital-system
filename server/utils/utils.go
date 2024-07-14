@@ -2,8 +2,9 @@ package utils
 
 import (
 	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"strings"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func HashPassword(password string) (string, error) {

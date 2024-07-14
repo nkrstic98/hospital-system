@@ -1,9 +1,11 @@
 package models
 
 import (
+	"database/sql"
 	"encoding/json"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -22,7 +24,7 @@ type Admission struct {
 	Anamnesis json.RawMessage `gorm:"not null;type:jsonb"`
 
 	Vitals      json.RawMessage `gorm:"default:null;type:jsonb"`
-	Diagnosis   *string         `gorm:"default:null"`
+	Diagnosis   sql.NullString  `gorm:"default:null"`
 	Medications json.RawMessage `gorm:"default:null;type:jsonb"`
 
 	Logs json.RawMessage `gorm:"type:jsonb"`

@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"hospital-system/server/config"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 var cfg *config.Config

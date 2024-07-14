@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"github.com/samber/lo"
-	"github.com/spf13/cobra"
 	"hospital-system/server/config"
 	"hospital-system/server/db"
+
+	"github.com/samber/lo"
+	"github.com/spf13/cobra"
 )
 
 var seedCmd = &cobra.Command{

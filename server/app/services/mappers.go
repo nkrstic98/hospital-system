@@ -3,10 +3,11 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"hospital-system/proto_gen/authorization/v1"
 	"hospital-system/server/app/dto"
 	"hospital-system/server/models"
+
+	"github.com/google/uuid"
 )
 
 func toDtoUser(user models.User, actor *authorization.Actor) dto.User {
