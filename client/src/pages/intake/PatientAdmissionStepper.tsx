@@ -274,13 +274,13 @@ export default function PatientAdmissionStepper() {
                     <h3>Please check data before proceeding!</h3>
                     <p><b>Admission Date: </b>{new Date().toLocaleDateString()}</p>
                     <p><b>Chief Complaint: </b> {patientSymptoms}</p>
-                    <p><b>History of Present Illness: </b> {hpi}</p>
-                    <p><b>Past Medical History: </b> {pmh}</p>
+                    <p><b>History of Present Illness: </b> {hpi != "" ? hpi : "/"}</p>
+                    <p><b>Past Medical History: </b> {pmh != "" ? pmh : "/"}</p>
                     <p><b>Medications: </b> {patientMedications.length > 0 ? patientMedications.join(", ") : "/"}</p>
                     <p><b>Allergies: </b>{checkedAllergies.length > 0 ? checkedAllergies.join(", ") : "/"}</p>
-                    <p><b>Family History: </b> {fh}</p>
-                    <p><b>Social History: </b> {sh}</p>
-                    <p><b>Physical Examination: </b> {pe}</p>
+                    <p><b>Family History: </b> {fh != "" ? fh : "/"}</p>
+                    <p><b>Social History: </b> {sh != "" ? sh : "/"}</p>
+                    <p><b>Physical Examination: </b> {pe != "" ? pe : "/"}</p>
                 </div>
             case 11:
                 return <DepartmentsAndPhysicians
@@ -349,6 +349,7 @@ export default function PatientAdmissionStepper() {
             form.lastname == "" ||
             form.nationalIdentificationNumber == "" ||
             form.medicalRecordNumber == "" ||
+            form.email == "" ||
             form.phoneNumber == "") {
             setUserRegisterAttempted(true);
             return;
@@ -358,10 +359,10 @@ export default function PatientAdmissionStepper() {
         patientService.Register({
             firstname: form.firstname,
             lastname: form.lastname,
-            nationalIdentificationNumber: form.nationalIdentificationNumber,
-            medicalRecordNumber: form.medicalRecordNumber,
+            national_identification_number: form.nationalIdentificationNumber,
+            medical_record_number: form.medicalRecordNumber,
             email: form.email,
-            phoneNumber: form.phoneNumber,
+            phone_number: form.phoneNumber,
         }).then(r => {
             if (!r) {
                 setPatientRegisterError(true);

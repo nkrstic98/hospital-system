@@ -8,10 +8,6 @@ export interface RegisterUserRequest {
     team: string | undefined;
 }
 
-export interface GetUsersResponse {
-    users: UserResponse[];
-}
-
 export interface UserResponse {
     firstname:   string;
     lastname:    string;

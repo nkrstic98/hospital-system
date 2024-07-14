@@ -1,9 +1,33 @@
-package patient
+package dto
 
 import (
 	"github.com/google/uuid"
 	"time"
 )
+
+type RegisterPatientRequest struct {
+	Firstname                    string `json:"firstname"`
+	Lastname                     string `json:"lastname"`
+	NationalIdentificationNumber string `json:"national_identification_number"`
+	MedicalRecordNumber          string `json:"medical_record_number"`
+	Email                        string `json:"email"`
+	PhoneNumber                  string `json:"phone_number"`
+}
+
+type AdmitPatientRequest struct {
+	PatientId               uuid.UUID `json:"patientId"`
+	Department              string    `json:"department"`
+	Physician               uuid.UUID `json:"physician"`
+	ChiefComplaint          string    `json:"chief_complaint"`
+	HistoryOfPresentIllness string    `json:"history_of_present_illness"`
+	PastMedicalHistory      string    `json:"past_medical_history"`
+	Medications             []string  `json:"medications"`
+	Allergies               []string  `json:"allergies"`
+	FamilyHistory           string    `json:"family_history"`
+	SocialHistory           string    `json:"social_history"`
+	PhysicalExamination     string    `json:"physical_examination"`
+	// TODO: Add vitals check
+}
 
 type Patient struct {
 	ID                           uuid.UUID `json:"id"`
@@ -14,7 +38,38 @@ type Patient struct {
 	Email                        string    `json:"email"`
 	PhoneNumber                  string    `json:"phoneNumber"`
 
-	Admissions []AdmissionDetails `json:"admissions"`
+	Admissions []Admission `json:"admissions"`
+}
+
+type Admission struct {
+	ID         uuid.UUID `json:"id"`
+	StartTime  time.Time `json:"start_time"`
+	EndTime    time.Time `json:"end_time"`
+	Status     string    `json:"status"`
+	Patient    string    `json:"patient"`
+	Department string    `json:"department"`
+	Physician  string    `json:"physician"`
+}
+
+type AdmissionDetails struct {
+	ID uuid.UUID `json:"id"`
+
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+	Status    string    `json:"status"`
+
+	Anamnesis Anamnesis `json:"intake_info"`
+
+	Vitals      Vitals            `json:"vitals"`
+	Diagnosis   *string           `json:"diagnosis"`
+	Medications *[]MedicationInfo `json:"medications"`
+	Labs        *[]Lab            `json:"labs"`
+
+	Logs []Log `json:"logs"`
+
+	Patient    Patient   `json:"patient"`
+	Department string    `json:"department"`
+	Physician  uuid.UUID `json:"physician"`
 }
 
 type Anamnesis struct {
@@ -67,25 +122,4 @@ type Lab struct {
 
 	TestType    string     `json:"test_type"`
 	TestResults *[]LabTest `json:"test_results"`
-}
-
-type AdmissionDetails struct {
-	ID uuid.UUID `json:"id"`
-
-	StartTime time.Time `json:"start_time"`
-	EndTime   time.Time `json:"end_time"`
-	Status    string    `json:"status"`
-
-	Anamnesis Anamnesis `json:"intake_info"`
-
-	Vitals      Vitals            `json:"vitals"`
-	Diagnosis   *string           `json:"diagnosis"`
-	Medications *[]MedicationInfo `json:"medications"`
-	Labs        *[]Lab            `json:"labs"`
-
-	Logs []Log `json:"logs"`
-
-	Patient    Patient   `json:"patient"`
-	Department string    `json:"department"`
-	Physician  uuid.UUID `json:"physician"`
 }

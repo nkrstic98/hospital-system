@@ -1,11 +1,14 @@
 package user
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"hospital-system/server/app/dto"
+)
 
 type Service interface {
-	CreateUser(user User) (*uuid.UUID, error)
-	GetUser(id uuid.UUID) (*User, error)
-	GetByUsername(username string) (*User, error)
+	CreateUser(user dto.User) error
+	GetUser(id uuid.UUID) (*dto.User, error)
+	GetByUsername(username string) (*dto.User, error)
 	ValidateUserPassword(userId uuid.UUID, password string) (bool, error)
-	GetUsers() ([]User, error)
+	GetUsers() ([]dto.User, error)
 }

@@ -1,20 +1,13 @@
 import {Patient} from "../../types/Patient.ts";
 import {GetAuthorizationToken} from "../../utils/utils.ts";
-import {
-    GetActiveAdmissionsByUserRequest,
-    GetAdmissionsRequest, GetAdmissionsResponse,
-    PatientGetResponse,
-    RegisterPatientAdmissionRequest,
-    RegisterPatientRequest,
-    RegisterPatientResponse
-} from "./types.ts";
+import {RegisterPatientAdmissionRequest, RegisterPatientRequest} from "./types.ts";
 import {Admission} from "../../types/Admission.ts";
 
 export class PatientService {
     private readonly baseUrl: string;
 
     constructor() {
-        this.baseUrl = "http://localhost:8080/api/v1/admin/patients";
+        this.baseUrl = "http://localhost:8080/api/v1/patients";
     }
 
     async GetPatient(id: string): Promise<Patient|undefined> {
@@ -32,9 +25,8 @@ export class PatientService {
             }
 
             const responseBody = await response.text();
-            const data = JSON.parse(responseBody) as PatientGetResponse;
 
-            return data.patient;
+            return JSON.parse(responseBody) as Patient;
         } catch (error) {
             console.error("Failed to get patient:", error);
             return undefined;
@@ -57,9 +49,8 @@ export class PatientService {
             }
 
             const responseBody = await response.text();
-            const data = JSON.parse(responseBody) as RegisterPatientResponse
 
-            return data.patient;
+            return JSON.parse(responseBody) as Patient;
         } catch(error) {
             console.error("Failed to add patient:", error);
             return undefined;
@@ -103,9 +94,9 @@ export class PatientService {
             }
 
             const responseBody = await response.text();
-            const data = JSON.parse(responseBody) as GetAdmissionsResponse;
+            const data = JSON.parse(responseBody) as Admission[];
 
-            return data.admissions.sort((a, b) => {
+            return data.sort((a, b) => {
                 return  new Date(b.admissionTime) > new Date(a.admissionTime) ? 1 : -1;
             });
         } catch (error) {

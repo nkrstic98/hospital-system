@@ -5,7 +5,7 @@ export class DepartmentService {
     private readonly baseUrl: string;
 
     constructor() {
-        this.baseUrl = "http://localhost:8080/api/v1/admin/departments";
+        this.baseUrl = "http://localhost:8080/api/v1/departments";
     }
 
     async GetDepartments(): Promise<Map<string, Department> | undefined> {

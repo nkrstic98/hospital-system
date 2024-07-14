@@ -16,13 +16,12 @@ import (
 	grpc2 "github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-redis/redis/v8"
 	"github.com/hashicorp/consul/api"
+	"go.uber.org/zap"
 	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 	"hospital-system/proto_gen/authorization/v1"
-	"hospital-system/server/api/v1"
-	"hospital-system/server/api/v1/admin"
-	session2 "hospital-system/server/api/v1/session"
+	"hospital-system/server/app/handlers"
 	"hospital-system/server/app/repositories/admission"
 	"hospital-system/server/app/repositories/patient"
 	"hospital-system/server/app/repositories/user"
@@ -53,23 +52,24 @@ func Build(cfg config.Config) (*gin.Engine, func(), error) {
 	}, nil
 }
 
-func buildAPI(db2 *gorm.DB, cfg config.Config, redisClient *redis.Client, userClient authorization.AuthorizationServiceClient) *v1.API {
+func buildAPI(db2 *gorm.DB, cfg config.Config, redisClient *redis.Client, userClient authorization.AuthorizationServiceClient) *handlers.Handler {
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
 	repositoryImpl := user.NewRepository(db2)
 	serviceImpl := user2.NewService(userClient, repositoryImpl)
 	patientRepositoryImpl := patient.NewRepository(db2)
 	admissionRepositoryImpl := admission.NewRepository(db2)
-	patientServiceImpl := patient2.NewService(userClient, patientRepositoryImpl, admissionRepositoryImpl)
+	patientServiceImpl := patient2.NewService(userClient, patientRepositoryImpl, admissionRepositoryImpl, serviceImpl)
 	departmentServiceImpl := department.NewService(userClient, repositoryImpl)
-	handlerImpl := admin.NewHandler(serviceImpl, patientServiceImpl, departmentServiceImpl)
 	sessionServiceImpl := session.NewService(redisClient, cfg)
-	sessionHandlerImpl := session2.NewHandler(serviceImpl, sessionServiceImpl)
-	api := v1.NewAPI(handlerImpl, sessionHandlerImpl, sessionServiceImpl)
+	api := handlers.NewHandler(logger, serviceImpl, sessionServiceImpl, patientServiceImpl, departmentServiceImpl)
 	return api
 }
 
 // wire.go:
 
-func initializeApp(api *v1.API, cfg config.Config) *gin.Engine {
+func initializeApp(api *handlers.Handler, cfg config.Config) *gin.Engine {
 	router := gin.Default()
 	config2 := cors.DefaultConfig()
 	config2.

@@ -1,6 +1,12 @@
-package department
+package dto
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
+
+type GetDepartmentsResponse struct {
+	Departments map[string]Department `json:"departments"`
+}
 
 type Department struct {
 	DisplayName string     `json:"displayName"`

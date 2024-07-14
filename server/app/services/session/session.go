@@ -6,6 +6,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/exp/slog"
+	"hospital-system/server/app/dto"
 	"hospital-system/server/config"
 	"time"
 )
@@ -22,7 +23,7 @@ func NewService(redisClient *redis.Client, config config.Config) *ServiceImpl {
 	}
 }
 
-func (service *ServiceImpl) CreateSession(claims TokenClaims) (string, error) {
+func (service *ServiceImpl) CreateSession(claims dto.TokenClaims) (string, error) {
 	tokenExpiration := time.Second * time.Duration(service.config.AuthToken.ExpirationSeconds)
 
 	claims.IssuedAt = &jwt.NumericDate{Time: time.Now()}
@@ -50,8 +51,8 @@ func (service *ServiceImpl) CreateSession(claims TokenClaims) (string, error) {
 	return signedToken, err
 }
 
-func (service *ServiceImpl) GetSession(token string) (*TokenClaims, error) {
-	claims := TokenClaims{}
+func (service *ServiceImpl) GetSession(token string) (*dto.TokenClaims, error) {
+	claims := dto.TokenClaims{}
 
 	// Get claims from Redis
 	claimsStr, err := service.redisClient.Get(context.Background(), token).Result()

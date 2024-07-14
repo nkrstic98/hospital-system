@@ -1,12 +1,12 @@
 import {GetAuthorizationToken} from "../../utils/utils.ts";
 import {User} from "../../types/User.ts";
-import {GetUsersResponse, RegisterUserRequest} from "./types.ts";
+import {RegisterUserRequest, UserResponse} from "./types.ts";
 
 export class UserService {
     private readonly baseUrl: string;
 
     constructor() {
-        this.baseUrl = "http://localhost:8080/api/v1/admin/users";
+        this.baseUrl = "http://localhost:8080/api/v1/users";
     }
 
     async Register(request: RegisterUserRequest): Promise<boolean> {
@@ -46,8 +46,8 @@ export class UserService {
             }
 
             const responseBody = await response.text();
-            const data = JSON.parse(responseBody) as GetUsersResponse;
-            return data.users.map(user => {
+            const data = JSON.parse(responseBody) as UserResponse[];
+            return data.map(user => {
                 return {
                     firstname: user.firstname,
                     lastname: user.lastname,

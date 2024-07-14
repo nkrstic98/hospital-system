@@ -215,7 +215,7 @@ const EmployeeRegister = ()=> {
                                     required
                                     fullWidth
                                     error={submitAttempted && (form.email === ""  || !isValidEmail(form.email))}
-                                    helperText={submitAttempted && form.email === "" ? "This field is required" : !isValidEmail(form.email) ? "Invalid email address" : ""}
+                                    helperText={submitAttempted && form.email === "" ? "This field is required" : submitAttempted && form.email !== "" && !isValidEmail(form.email) ? "Invalid email address" : ""}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>

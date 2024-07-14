@@ -1,21 +1,10 @@
-import {Patient} from "../../types/Patient.ts";
-import {Admission} from "../../types/Admission.ts";
-
-export interface PatientGetResponse {
-    patient: Patient | undefined;
-}
-
 export interface RegisterPatientRequest {
     firstname: string;
     lastname: string;
-    nationalIdentificationNumber: string;
-    medicalRecordNumber: string;
+    national_identification_number: string;
+    medical_record_number: string;
     email: string;
-    phoneNumber: string;
-}
-
-export interface RegisterPatientResponse {
-    patient: Patient | undefined;
+    phone_number: string;
 }
 
 export interface RegisterPatientAdmissionRequest {
@@ -39,8 +28,4 @@ export interface GetAdmissionsRequest {
 export interface GetActiveAdmissionsByUserRequest {
     userId: string;
     statuses: string[];
-}
-
-export interface GetAdmissionsResponse {
-    admissions: Admission[];
 }

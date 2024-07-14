@@ -5,7 +5,7 @@ export class SessionService {
     private readonly baseUrl: string;
 
     constructor() {
-        this.baseUrl = "http://localhost:8080/api/v1/session";
+        this.baseUrl = "http://localhost:8080/api/v1/sessions";
     }
 
     async Login(loginRequest: LoginRequest): Promise<User | undefined> {

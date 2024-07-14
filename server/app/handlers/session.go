@@ -1,16 +1,14 @@
-package session
+package handlers
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"hospital-system/server/app/services/session"
-	"hospital-system/server/app/services/user"
+	"go.uber.org/zap"
+	"hospital-system/server/app/dto"
 	"net/http"
 )
 
 const (
-	AuthorizationCookieName = "Authorization"
-
 	Session_Login_BadRequestErr            = "bad_request"
 	Session_Login_UserPasswordPairWrongErr = "user_password_pair_wrong"
 	Session_Login_UserNotFoundErr          = "user_not_found"
@@ -23,53 +21,45 @@ const (
 	Session_Validate_SessionGetFailedErr = "session_get_failed"
 	Session_Validate_SessionExpiredErr   = "session_expired"
 	Session_Validate_UserNotFoundErr     = "user_not_found"
-	Session_Validate_InactiveAccountErr  = "inactive_account"
 )
 
-type HandlerImpl struct {
-	userService    user.Service
-	sessionService session.Service
-}
-
-func NewHandler(userService user.Service, sessionService session.Service) *HandlerImpl {
-	return &HandlerImpl{
-		userService:    userService,
-		sessionService: sessionService,
-	}
-}
-
-func (this *HandlerImpl) Login(c *gin.Context) {
-	var loginRequest LoginRequest
-	if err := c.BindJSON(&loginRequest); err != nil {
+func (h *Handler) login(c *gin.Context) {
+	var request dto.LoginRequest
+	if err := c.BindJSON(&request); err != nil {
+		h.log.Error("Failed to bind JSON login request", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": Session_Login_BadRequestErr})
 		return
 	}
 
-	existingUser, err := this.userService.GetByUsername(loginRequest.Username)
+	existingUser, err := h.userService.GetByUsername(request.Username)
 	if err != nil {
+		h.log.Error("Failed to get user by username", zap.String("username", request.Username), zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": Session_Login_UserPasswordPairWrongErr})
 		return
 	}
-
 	if existingUser == nil {
+		h.log.Warn("User not found", zap.String("username", request.Username))
 		c.JSON(http.StatusNotFound, gin.H{"error": Session_Login_UserNotFoundErr})
 		return
 	}
 
-	isPasswordValid, err := this.userService.ValidateUserPassword(existingUser.ID, loginRequest.Password)
+	isPasswordValid, err := h.userService.ValidateUserPassword(existingUser.ID, request.Password)
 	if err != nil {
+		h.log.Error("Failed to validate user password", zap.String("username", request.Username), zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": Session_Login_UserNotFoundErr})
 		return
 	}
 	if !isPasswordValid {
-		c.JSON(http.StatusForbidden, gin.H{"error": Session_Login_UserPasswordPairWrongErr})
+		h.log.Warn("User password pair is wrong", zap.String("username", request.Username))
+		c.JSON(http.StatusBadRequest, gin.H{"error": Session_Login_UserPasswordPairWrongErr})
 		return
 	}
 
-	jwtToken, err := this.sessionService.CreateSession(session.TokenClaims{
+	jwtToken, err := h.sessionService.CreateSession(dto.TokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject: existingUser.ID.String(),
 		},
+		UserID:                       existingUser.ID,
 		Username:                     existingUser.Username,
 		NationalIdentificationNumber: existingUser.NationalIdentificationNumber,
 		Email:                        existingUser.Email,
@@ -80,6 +70,7 @@ func (this *HandlerImpl) Login(c *gin.Context) {
 		Permissions:                  existingUser.Permissions,
 	})
 	if err != nil {
+		h.log.Error("Failed to create session", zap.String("username", request.Username), zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": Session_Login_CreateSessionFailedErr})
 		return
 	}
@@ -87,9 +78,9 @@ func (this *HandlerImpl) Login(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(AuthorizationCookieName, jwtToken, 900, "/", "localhost", false, true)
 
-	c.JSON(http.StatusOK, gin.H{
-		"token": jwtToken,
-		"user": user.User{
+	c.JSON(http.StatusOK, dto.LoginResponse{
+		Token: jwtToken,
+		User: dto.User{
 			Firstname:                    existingUser.Firstname,
 			Lastname:                     existingUser.Lastname,
 			NationalIdentificationNumber: existingUser.NationalIdentificationNumber,
@@ -102,50 +93,53 @@ func (this *HandlerImpl) Login(c *gin.Context) {
 	})
 }
 
-func (this *HandlerImpl) Logout(c *gin.Context) {
-	var request LogoutRequest
+func (h *Handler) logout(c *gin.Context) {
+	var request dto.LogoutRequest
 	if err := c.BindJSON(&request); err != nil {
+		h.log.Error("Failed to bind JSON logout request", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": Session_Logout_BadRequestErr})
 		return
 	}
 
-	if err := this.sessionService.DeleteSession(request.Token); err != nil {
+	if err := h.sessionService.DeleteSession(request.Token); err != nil {
+		h.log.Error("Failed to delete session", zap.String("token", request.Token), zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": Session_Logout_DeleteSessionFailedErr})
 		return
 	}
 
 	c.SetCookie(AuthorizationCookieName, "", -1, "/", "localhost", false, true)
 
-	c.JSON(http.StatusOK, gin.H{})
+	c.JSON(http.StatusOK, nil)
 }
 
-func (this *HandlerImpl) ValidateSession(c *gin.Context) {
-	var request ValidateSessionRequest
+func (h *Handler) validateSession(c *gin.Context) {
+	var request dto.ValidateSessionRequest
 	if err := c.BindJSON(&request); err != nil {
+		h.log.Error("Failed to bind JSON validate session request", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"error": Session_Validate_BadRequestErr})
 		return
 	}
 
-	claims, err := this.sessionService.GetSession(request.Token)
+	claims, err := h.sessionService.GetSession(request.Token)
 	if err != nil {
+		h.log.Error("Failed to get session", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": Session_Validate_SessionGetFailedErr})
-		c.Abort()
 		return
 	}
 	if claims == nil {
+		h.log.Warn("Session expired", zap.String("token", request.Token))
 		c.JSON(http.StatusUnauthorized, gin.H{"error": Session_Validate_SessionExpiredErr})
-		c.Abort()
 		return
 	}
 
-	existingUser, err := this.userService.GetByUsername(claims.Username)
+	existingUser, err := h.userService.GetByUsername(claims.Username)
 	if err != nil || existingUser == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": Session_Validate_UserNotFoundErr})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"user": user.User{
+	c.JSON(http.StatusOK, dto.ValidateSessionResponse{
+		User: dto.User{
 			ID:                           existingUser.ID,
 			Firstname:                    claims.Firstname,
 			Lastname:                     claims.Lastname,

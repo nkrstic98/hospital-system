@@ -94,7 +94,10 @@ const PatientRegister = ({ form, updateFormField, userRegisterAttempted }: Patie
                             label="Email Address"
                             value={form.email}
                             onChange={(e) => updateFormField("email", e.target.value)}
+                            required
                             fullWidth
+                            error={userRegisterAttempted && form.email === ""}
+                            helperText={userRegisterAttempted && form.email === "" ? "This field is required" : ""}
                         />
                     </Grid>
                 </Grid>

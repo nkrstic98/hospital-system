@@ -1,5 +1,7 @@
 package patient
 
+import "hospital-system/server/app/dto"
+
 const (
 	TestType_CBC          = "Complete Blood Count (CBC)"
 	TestType_BMP          = "Basic Metabolic Panel (BMP)"
@@ -19,7 +21,7 @@ const (
 	TestType_TumorMarkers = "Tumor Markers"
 )
 
-var LabTests = map[string][]LabTest{
+var LabTests = map[string][]dto.LabTest{
 	"Complete Blood Count (CBC)": {
 		{Name: "White Blood Cells (WBC)", Unit: "cells/mcL", MinValue: 4500, MaxValue: 11000, ReferenceRange: "4500-11000 cells/mcL"},
 		{Name: "Red Blood Cells (RBC)", Unit: "cells/mcL", MinValue: 4.5, MaxValue: 6.0, ReferenceRange: "4.5-6.0 cells/mcL"},
