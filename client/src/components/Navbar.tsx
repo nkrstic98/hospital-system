@@ -14,10 +14,11 @@ import {useAuth} from "../router/AuthProvider.tsx";
 import {Link, useNavigate} from "react-router-dom";
 import {GetUserPermission} from "../utils/utils.ts";
 
-const adminPages: Map<string, string[]> = new Map([
-    ["INTAKE", ['Patient Intake', '/patient-intake']],
-    ["EMPLOYEES", ['Employee Management', '/employees']],
-    ["PATIENTS", ['Assigned Patients', '/patients']],
+const menuItems: Map<string, string[][]> = new Map([
+    ["INTAKE", [['Patient Intake', '/patient-intake']]],
+    ["EMPLOYEES", [['Employees', '/employees']]],
+    ["ADMISSIONS", [['Assigned Patients', '/patients/admissions']]],
+    ["LABS", [['Labs', '/labs']]],
 ]);
 
 function ResponsiveAppBar() {
@@ -40,7 +41,7 @@ function ResponsiveAppBar() {
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+            <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 2 }}>
                     <Toolbar>
                         <Avatar
                             src="/logo21.png"
@@ -92,15 +93,17 @@ function ResponsiveAppBar() {
                         </Typography>
 
                         <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
-                            {Array.from(adminPages.entries()).map(([key, value]) => (
-                                GetUserPermission(user, key) && <Button
-                                    variant="outlined"
-                                    key={key}
-                                    sx={{my: 2, color: 'white', display: 'block'}}
-                                    onClick={() => navigate(value[1])}
-                                >
-                                    {value[0]}
-                                </Button>
+                            {Array.from(menuItems.entries()).map(([key, value]) => (
+                                GetUserPermission(user, key) && value.map((page, index) => (
+                                    <Button
+                                        variant="outlined"
+                                        key={`${key}-${index}`}
+                                        sx={{my: 2, color: 'white', display: 'block'}}
+                                        onClick={() => navigate(page[1])}
+                                    >
+                                        {page[0]}
+                                    </Button>
+                                ))
                             ))}
                         </Box>
 

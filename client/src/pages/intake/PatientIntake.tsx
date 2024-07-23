@@ -12,10 +12,10 @@ import TableBody from "@mui/material/TableBody";
 import {useNavigate} from "react-router-dom";
 import {PatientService} from "../../services/patient/Patient.ts";
 import {useEffect, useState} from "react";
-import {Admission} from "../../types/Admission.ts";
 import {Chip, Modal} from "@mui/material";
 import {GetUserPermission} from "../../utils/utils.ts";
 import {useAuth} from "../../router/AuthProvider.tsx";
+import {Admission} from "../../types/Patient.ts";
 
 const style = {
     position: 'absolute',
@@ -57,7 +57,7 @@ const PatientIntake = ({ section }: PatientIntakeProps) => {
     }, [isAuthenticated, section, user]);
 
     useEffect(() => {
-        patientService.GetActiveAdmissions().then((admissions) => {
+        patientService.GetActiveAdmissions("").then((admissions) => {
             if(admissions) {
                 setAdmissions(admissions);
             }
@@ -86,12 +86,11 @@ const PatientIntake = ({ section }: PatientIntakeProps) => {
                                 <TableCell align="center">Physician</TableCell>
                                 <TableCell align="center">Admission Time</TableCell>
                                 <TableCell align="center">Admission Status</TableCell>
-                                <TableCell align="center"></TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {admissions.map((a) => (
-                                <TableRow>
+                                <TableRow key={a.id}>
                                     <TableCell />
                                     <TableCell align="center">{a.patient}</TableCell>
                                     <TableCell align="center">{a.department}</TableCell>
@@ -102,7 +101,10 @@ const PatientIntake = ({ section }: PatientIntakeProps) => {
                                             a.status === "pending" ?
                                                 <Chip label="Pending" color="warning" />
                                                 :
-                                                <Chip label="Admitted" color="success" />
+                                                a.status === "awaiting-transfer" ?
+                                                <Chip label="Awaiting Transfer" color="info" />
+                                                    :
+                                                    <Chip label="Admitted" color="success" />
                                         }
                                     </TableCell>
                                 </TableRow>

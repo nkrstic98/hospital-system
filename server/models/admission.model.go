@@ -9,17 +9,18 @@ import (
 )
 
 const (
-	StatusPending    = "pending"
-	StatusAdmitted   = "admitted"
-	StatusDischarged = "discharged"
+	StatusPending          = "pending"
+	StatusAwaitingTransfer = "awaiting-transfer"
+	StatusAdmitted         = "admitted"
+	StatusDischarged       = "discharged"
 )
 
 type Admission struct {
 	ID uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
 
-	StartTime time.Time `gorm:"not null;default:CURRENT_TIMESTAMP"`
-	EndTime   time.Time `gorm:"default:null"`
-	Status    string    `gorm:"not null;default:'pending'"`
+	StartTime time.Time    `gorm:"not null;default:CURRENT_TIMESTAMP"`
+	EndTime   sql.NullTime `gorm:"default:null"`
+	Status    string       `gorm:"not null;default:'pending'"`
 
 	Anamnesis json.RawMessage `gorm:"not null;type:jsonb"`
 

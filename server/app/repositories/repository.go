@@ -25,13 +25,18 @@ type Repository interface {
 	// Admissions
 	InsertAdmission(ctx context.Context, admission models.Admission) (*models.Admission, error)
 	GetAdmission(ctx context.Context, id uuid.UUID) (*models.Admission, error)
+	UpdateAdmission(ctx context.Context, admission *models.Admission) error
 	DeleteAdmission(ctx context.Context, id uuid.UUID) error
 	GetAdmissionsByPatientId(ctx context.Context, id uuid.UUID) ([]models.Admission, error)
 	GetAdmissionsByStatuses(ctx context.Context, statuses []string) ([]models.Admission, error)
 	GetAdmissionsByIDs(ctx context.Context, ids []uuid.UUID) ([]models.Admission, error)
 
 	// Labs
+	InsertLab(ctx context.Context, lab models.Lab) error
+	GetLabs(ctx context.Context) ([]models.Lab, error)
+	GetLab(ctx context.Context, id uuid.UUID) (*models.Lab, error)
 	GetLabsByAdmissionID(ctx context.Context, admissionID uuid.UUID) ([]models.Lab, error)
+	UpdateLab(ctx context.Context, lab *models.Lab) error
 }
 
 type RepositoryImpl struct {

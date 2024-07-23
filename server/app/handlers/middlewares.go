@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/samber/lo"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -42,8 +43,22 @@ func (h *Handler) rbacAuthMiddleware(section, permission string) gin.HandlerFunc
 			return
 		}
 
+		user, err := h.userService.GetUser(ctx, claims.UserID)
+		if err != nil {
+			h.log.Error("Failed to fetch user", zap.Error(err))
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": Authorization_FailedToFetchSessionErr})
+			ctx.Abort()
+			return
+		}
+		if user == nil {
+			h.log.Warn("User not found")
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": Authorization_SessionExpiredErr})
+			ctx.Abort()
+			return
+		}
+
 		if section != "%" {
-			givenPermission, found := claims.Permissions[section]
+			givenPermission, found := user.Permissions[section]
 			if !found || (permission == "WRITE" && givenPermission != "WRITE") {
 				h.log.Warn("User is not allowed to access this resource",
 					zap.Any("user", claims.UserID), zap.String("section", section))
@@ -60,6 +75,10 @@ func (h *Handler) rbacAuthMiddleware(section, permission string) gin.HandlerFunc
 			ctx.Abort()
 			return
 		}
+
+		ctx.Set("userId", claims.UserID)
+		ctx.Set("userTeam", lo.FromPtrOr(claims.Team, ""))
+		ctx.Set("userRole", claims.Role)
 
 		// If everything goes well, allow user to execute the operation
 		ctx.Next()

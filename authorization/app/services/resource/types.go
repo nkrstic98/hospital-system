@@ -17,9 +17,11 @@ type JourneyStep struct {
 }
 
 type Resource struct {
-	ID          uuid.UUID
-	Team        string
-	TeamLead    uuid.UUID
-	Assignments Assignment
-	Journey     []JourneyStep
+	ID              uuid.UUID
+	Team            string
+	TeamLead        uuid.UUID
+	Assignments     []Assignment
+	Journey         []JourneyStep
+	PendingTransfer *JourneyStep
+	Archived        *bool
 }

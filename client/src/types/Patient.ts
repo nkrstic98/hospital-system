@@ -1,5 +1,3 @@
-import {Admission} from "./Admission.ts";
-
 export interface Patient {
     id: string;
     firstname: string;
@@ -9,4 +7,14 @@ export interface Patient {
     email: string;
     phoneNumber: string;
     admissions: Array<Admission> | null;
+}
+
+export interface Admission {
+    id: string;
+    startTime: Date;
+    endTime?: Date;
+    status: string;
+    patient: string;
+    department: string;
+    physician: string;
 }

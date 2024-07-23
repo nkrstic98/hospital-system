@@ -6,6 +6,7 @@ import {User} from "../../types/User.ts";
 import {Department} from "../../services/user/types.ts";
 
 export interface DepartmentAdPhysiciansProps {
+    user?: User,
     departmentPhysicians: Map<string, Department> | undefined;
     department: string;
     physician: string;
@@ -17,6 +18,7 @@ export interface DepartmentAdPhysiciansProps {
 }
 
 const DepartmentsAndPhysicians = ({
+    user,
     departmentPhysicians,
     department,
     physician,
@@ -26,7 +28,17 @@ const DepartmentsAndPhysicians = ({
     departmentError,
     physicianError
 }: DepartmentAdPhysiciansProps) => {
-    const [doctor, setDoctor] = useState<string>("");
+    const [doctor, setDoctor] = useState<string>(JSON.stringify({
+        id: user?.id ?? "",
+        firstname: user?.firstname ?? "",
+        lastname: user?.lastname ?? "",
+        nationalIdentificationNumber: user?.nationalIdentificationNumber ?? "",
+        username: user?.username ?? "",
+        email: user?.email ?? "",
+        role: "",
+        team: null,
+        permissions: null,
+    }));
 
     return (
         <>

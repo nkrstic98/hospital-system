@@ -9,35 +9,40 @@ import (
 )
 
 var attendingPermissionsMap = map[string]string{
-	"PATIENTS:HISTORY":            "READ",
-	"PATIENTS:INFO":               "WRITE",
-	"PATIENTS:VITALS":             "WRITE",
-	"PATIENTS:DIAGNOSIS":          "WRITE",
-	"PATIENTS:CONSULTS":           "WRITE",
-	"PATIENTS:TRANSFER":           "WRITE",
-	"PATIENTS:DISCHARGE":          "WRITE",
-	"PATIENTS:MEDICINE:PRESCRIBE": "WRITE",
-	"PATIENTS:MEDICINE:GIVE":      "WRITE",
-	"PATIENTS:LABS:ORDER":         "WRITE",
-	"PATIENTS:LABS:RESULT":        "READ",
-	"PATIENTS:IMAGING:ORDER":      "WRITE",
-	"PATIENTS:IMAGING:RESULT":     "READ",
+	"ADMISSIONS":                     "WRITE",
+	"PATIENTS:HISTORY":               "READ",
+	"PATIENTS:INFO":                  "WRITE",
+	"PATIENTS:VITALS":                "WRITE",
+	"PATIENTS:DIAGNOSIS":             "WRITE",
+	"PATIENTS:CONSULTS":              "WRITE",
+	"PATIENTS:TRANSFER":              "WRITE",
+	"PATIENTS:DISCHARGE":             "WRITE",
+	"PATIENTS:MEDICATIONS:PRESCRIBE": "WRITE",
+	"PATIENTS:MEDICATIONS:GIVE":      "WRITE",
+	"PATIENTS:LABS:ORDER":            "WRITE",
+	"PATIENTS:LABS:RESULT":           "READ",
+	"PATIENTS:IMAGING:ORDER":         "WRITE",
+	"PATIENTS:IMAGING:RESULT":        "READ",
+	"PATIENTS:LOGS":                  "READ",
+	"PATIENTS:TEAM":                  "WRITE",
 }
 
 var residentPermissionsMap = map[string]string{
-	"PATIENTS:INFO":           "READ",
-	"PATIENTS:VITALS":         "WRITE",
-	"PATIENTS:DIAGNOSIS":      "READ",
-	"PATIENTS:MEDICINE:GIVE":  "WRITE",
-	"PATIENTS:LABS:RESULT":    "READ",
-	"PATIENTS:IMAGING:RESULT": "READ",
+	"ADMISSIONS":                "READ",
+	"PATIENTS:INFO":             "READ",
+	"PATIENTS:VITALS":           "WRITE",
+	"PATIENTS:DIAGNOSIS":        "READ",
+	"PATIENTS:MEDICATIONS:GIVE": "WRITE",
+	"PATIENTS:LABS:RESULT":      "READ",
+	"PATIENTS:IMAGING:RESULT":   "READ",
 }
 
 var nursePermissionsMap = map[string]string{
-	"PATIENTS:INFO":          "READ",
-	"PATIENTS:VITALS":        "WRITE",
-	"PATIENTS:DIAGNOSIS":     "READ",
-	"PATIENTS:MEDICINE:GIVE": "WRITE",
+	"ADMISSIONS":                "READ",
+	"PATIENTS:INFO":             "READ",
+	"PATIENTS:VITALS":           "WRITE",
+	"PATIENTS:DIAGNOSIS":        "READ",
+	"PATIENTS:MEDICATIONS:GIVE": "WRITE",
 }
 
 func SeedDatabase() error {
@@ -83,8 +88,9 @@ func SeedDatabase() error {
 				Permissions: nursePermissionsSerialized,
 			},
 			{
-				ID:   "TECHNICIAN",
-				Name: "Technician",
+				ID:          "TECHNICIAN",
+				Name:        "Technician",
+				Permissions: []byte(`{}`),
 			},
 		}).Error; err != nil {
 			slog.Error(fmt.Sprintf("Failed to create predefined roles: %s", err.Error()))

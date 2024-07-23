@@ -87,10 +87,16 @@ func (s *UserService) GetUser(ctx context.Context, id uuid.UUID) (*dto.User, err
 		return nil, nil
 	}
 
-	return &dto.User{
-		Firstname: user.Firstname,
-		Lastname:  user.Lastname,
-	}, nil
+	actorResponse, err := s.authorizationClient.GetActor(ctx, &authorization.GetActorRequest{
+		ActorId: user.ID.String(),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get actor from authorization database: %w", err)
+	}
+
+	dtoUser := toDtoUser(*user, actorResponse.Actor)
+
+	return &dtoUser, nil
 }
 
 func (s *UserService) GetByUsername(ctx context.Context, username string) (*dto.User, error) {
@@ -156,11 +162,16 @@ func (s *UserService) GetUsers(ctx context.Context) ([]dto.User, error) {
 	return userList, nil
 }
 
-// TODO: Refactor this flow to be generic
 func (s *UserService) GetDepartments(ctx context.Context, team, role *string) (map[string]dto.Department, error) {
 	teams, err := s.authorizationClient.GetTeams(ctx, &authorization.GetTeamsRequest{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get teams: %w", err)
+	}
+
+	if team != nil {
+		teams.Teams = lo.Filter(teams.Teams, func(t *authorization.Team, _ int) bool {
+			return t.Name == *team
+		})
 	}
 
 	departments := make(map[string]dto.Department)
@@ -179,7 +190,15 @@ func (s *UserService) GetDepartments(ctx context.Context, team, role *string) (m
 		departments[t.Name] = dto.Department{
 			DisplayName: t.DisplayName,
 			Users: lo.Map(users, func(p models.User, _ int) dto.User {
-				return toDtoUser(p, nil)
+				actor, found := lo.Find(t.Actors, func(a *authorization.Actor) bool {
+					return a.ActorId == p.ID.String()
+				})
+
+				if !found {
+					return toDtoUser(p, nil)
+				}
+
+				return toDtoUser(p, actor)
 			}),
 		}
 	}

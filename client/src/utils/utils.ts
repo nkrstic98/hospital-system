@@ -13,6 +13,10 @@ export function GetAuthorizationToken() {
     return "";
 }
 
+export function RemoveAuthorizationToken() {
+    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
 export function GetUserPermission(user: User | undefined, section: string): string | undefined {
     if (user == undefined || user.permissions == undefined) {
         return undefined;
@@ -21,4 +25,9 @@ export function GetUserPermission(user: User | undefined, section: string): stri
     const userPermissions = new Map<string, string>(Object.entries(user.permissions));
 
     return userPermissions.get(section);
+}
+
+export function getTimeString(time: Date) {
+    const date = new Date(time);
+    return date.toLocaleDateString() + " " + date.toLocaleTimeString();
 }

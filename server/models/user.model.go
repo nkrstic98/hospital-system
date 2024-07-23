@@ -17,4 +17,7 @@ type User struct {
 	Username                     string `gorm:"not null;uniqueIndex"`
 	Email                        string `gorm:"not null;uniqueIndex"`
 	Password                     string `gorm:"not null"`
+
+	OrderedLabs   []Lab `gorm:"foreignKey:RequestedBy;references:id;constraint:OnDelete:SET NULL;"`
+	ProcessedLabs []Lab `gorm:"foreignKey:ProcessedBy;references:id;constraint:OnDelete:SET NULL;"`
 }

@@ -44,9 +44,10 @@ func Build(cfg config.Config) (*gin.Engine, func(), error) {
 
 	userService := services.NewUserService(authServiceClient, repo)
 	sessionService := services.NewSessionService(redisClient, cfg.AuthToken)
-	patientService := services.NewPatientService(authServiceClient, repo, userService)
+	patientService := services.NewPatientService(logger, authServiceClient, repo, userService)
+	labService := services.NewLabService(logger, repo)
 
-	handler := handlers.NewHandler(logger, userService, sessionService, patientService)
+	handler := handlers.NewHandler(logger, userService, sessionService, patientService, labService)
 
 	router := gin.Default()
 	routerConfig := cors.DefaultConfig()

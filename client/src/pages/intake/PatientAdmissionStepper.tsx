@@ -21,6 +21,7 @@ import DepartmentsAndPhysicians from "./DepartmentsAndPhysicians.tsx";
 import {useNavigate} from "react-router-dom";
 import {UserService} from "../../services/user/User.ts";
 import {Department} from "../../services/user/types.ts";
+import {useAuth} from "../../router/AuthProvider.tsx";
 
 const style = {
     position: 'absolute' as const,
@@ -99,6 +100,7 @@ const useRegisterPatientForm = () => {
 
 export default function PatientAdmissionStepper() {
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const patientService = new PatientService();
     const userService = new UserService();
@@ -127,10 +129,10 @@ export default function PatientAdmissionStepper() {
 
     const [departmentPhysicians, setDepartmentPhysicians] = useState<Map<string, Department> | undefined>(undefined);
 
-    const [department , setDepartment] = useState<string>("");
+    const [department , setDepartment] = useState<string>(user?.team ?? "");
     const [departmentError, setDepartmentError] = useState<boolean>(false);
 
-    const [physician, setPhysician] = useState<string>("");
+    const [physician, setPhysician] = useState<string>(user?.id ?? "");
     const [physicianName, setPhysicianName] = useState<string>("");
     const [physicianError, setPhysicianError] = useState<boolean>(false);
 
@@ -191,18 +193,25 @@ export default function PatientAdmissionStepper() {
     };
 
     const handleFinish = () => {
+        if (user == undefined || user.team == undefined) {
+            setSubmissionFailure(true);
+            return;
+        }
+
         patientService.RegisterPatientAdmission({
             patientId: patient?.id as string,
             department: department,
             physician: physician,
-            chief_complaint: patientSymptoms,
-            history_of_present_illness: hpi,
-            past_medical_history: pmh,
+            chiefComplaint: patientSymptoms,
+            historyOfPresentIllness: hpi,
+            pastMedicalHistory: pmh,
             medications: patientMedications,
             allergies: checkedAllergies,
-            family_history: fh,
-            social_history: sh,
-            physical_examination: pe
+            familyHistory: fh,
+            socialHistory: sh,
+            physicalExamination: pe,
+            admittedBy: user.id,
+            admittedByTeam: user.team,
         }).then((r) => {
             if (!r) {
                 setSubmissionFailure(true);
@@ -284,6 +293,7 @@ export default function PatientAdmissionStepper() {
                 </div>
             case 11:
                 return <DepartmentsAndPhysicians
+                    user={user}
                     departmentPhysicians={departmentPhysicians}
                     department={department}
                     physician={physician}
@@ -358,14 +368,7 @@ export default function PatientAdmissionStepper() {
         }
 
         setUserRegisterAttempted(false);
-        patientService.Register({
-            firstname: form.firstname,
-            lastname: form.lastname,
-            national_identification_number: form.nationalIdentificationNumber,
-            medical_record_number: form.medicalRecordNumber,
-            email: form.email,
-            phone_number: form.phoneNumber,
-        }).then(r => {
+        patientService.RegisterPatient(form).then(r => {
             if (!r) {
                 setPatientRegisterError(true);
             } else {

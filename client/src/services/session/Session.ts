@@ -1,5 +1,6 @@
 import {LoginRequest, LoginResponse, LogoutRequest, ValidateSessionRequest, ValidateSessionResponse} from "./types.ts";
 import {User} from "../../types/User.ts";
+import {RemoveAuthorizationToken} from "../../utils/utils.ts";
 
 export class SessionService {
     private readonly baseUrl: string;
@@ -77,7 +78,7 @@ export class SessionService {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            RemoveAuthorizationToken();
 
             return true;
         } catch (error) {

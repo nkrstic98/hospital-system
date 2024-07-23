@@ -9,7 +9,9 @@ import EmployeeRegister from "./pages/employees/EmployeeRegister.tsx";
 import PatientIntake from "./pages/intake/PatientIntake.tsx";
 import PatientAdmissionStepper from "./pages/intake/PatientAdmissionStepper.tsx";
 import Home from "./pages/global/Home.tsx";
-import Admissions from "./pages/patient_admissions/Admissions.tsx";
+import AdmissionDetailsPage from "./pages/patients/AdmissionDetailsPage.tsx";
+import Admissions from "./pages/patients/Admissions.tsx";
+import ProcessLabsPage from "./pages/labs/ProcessLabsPage.tsx";
 
 function App() {
     return (
@@ -48,9 +50,20 @@ function App() {
                     </ProtectedRoute>
                 } />
 
-                <Route path={"/patients"} element={
+                <Route path={"/patients/admissions"} element={
                     <ProtectedRoute section={"PATIENTS"}  permission={"READ"}>
                         <Admissions />
+                    </ProtectedRoute>
+                } />
+                <Route path={"/patients/admissions/:id"} element={
+                    <ProtectedRoute section={"PATIENTS"}  permission={"READ"}>
+                        <AdmissionDetailsPage />
+                    </ProtectedRoute>
+                } />
+
+                <Route path={"/labs"} element={
+                    <ProtectedRoute section={"LABS"}  permission={"WRITE"}>
+                        <ProcessLabsPage />
                     </ProtectedRoute>
                 } />
             </Routes>

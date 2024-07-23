@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from "./AuthProvider.tsx";
-import {GetUserPermission} from "../utils/utils.ts";
+import {GetAuthorizationToken, GetUserPermission} from "../utils/utils.ts";
 
 export interface ProtectedRouteProps {
     children: React.ReactNode;
@@ -11,9 +11,10 @@ export interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, section, permission }: ProtectedRouteProps) => {
     const location = useLocation();
+    const token = GetAuthorizationToken();
     const { isAuthenticated, user } = useAuth();
 
-    if (!isAuthenticated || user === undefined) {
+    if (token == "" || !isAuthenticated || user === undefined) {
         return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
@@ -24,7 +25,7 @@ const ProtectedRoute = ({ children, section, permission }: ProtectedRouteProps) 
     const assignedPermission = GetUserPermission(user, section);
 
     if(assignedPermission == undefined) {
-        return <Navigate to="/login" replace state={{ from: location }} />;
+        return <Navigate to="/home" replace state={{ from: location }} />;
     }
 
     if (permission !== undefined) {
@@ -41,7 +42,7 @@ const ProtectedRoute = ({ children, section, permission }: ProtectedRouteProps) 
                 break;
         }
 
-        return <Navigate to="/login" replace state={{ from: location }} />;
+        return <Navigate to="/home" replace state={{ from: location }} />;
     }
 
     return children;

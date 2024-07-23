@@ -6,6 +6,6 @@ export interface User {
     username: string;
     email: string;
     role:        string;
-    team:        string | null;
+    team?:        string;
     permissions: Map<string, string> | null;
 }

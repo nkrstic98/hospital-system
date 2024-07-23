@@ -19,14 +19,19 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	AuthorizationService_AddActor_FullMethodName          = "/authorization.v1.AuthorizationService/AddActor"
-	AuthorizationService_GetActor_FullMethodName          = "/authorization.v1.AuthorizationService/GetActor"
-	AuthorizationService_GetActors_FullMethodName         = "/authorization.v1.AuthorizationService/GetActors"
-	AuthorizationService_GetTeams_FullMethodName          = "/authorization.v1.AuthorizationService/GetTeams"
-	AuthorizationService_AddResource_FullMethodName       = "/authorization.v1.AuthorizationService/AddResource"
-	AuthorizationService_GetResources_FullMethodName      = "/authorization.v1.AuthorizationService/GetResources"
-	AuthorizationService_GetActorResources_FullMethodName = "/authorization.v1.AuthorizationService/GetActorResources"
-	AuthorizationService_ArchiveResource_FullMethodName   = "/authorization.v1.AuthorizationService/ArchiveResource"
+	AuthorizationService_AddActor_FullMethodName                 = "/authorization.v1.AuthorizationService/AddActor"
+	AuthorizationService_GetActor_FullMethodName                 = "/authorization.v1.AuthorizationService/GetActor"
+	AuthorizationService_GetActors_FullMethodName                = "/authorization.v1.AuthorizationService/GetActors"
+	AuthorizationService_GetTeams_FullMethodName                 = "/authorization.v1.AuthorizationService/GetTeams"
+	AuthorizationService_AddResource_FullMethodName              = "/authorization.v1.AuthorizationService/AddResource"
+	AuthorizationService_GetResources_FullMethodName             = "/authorization.v1.AuthorizationService/GetResources"
+	AuthorizationService_GetResource_FullMethodName              = "/authorization.v1.AuthorizationService/GetResource"
+	AuthorizationService_TransferResource_FullMethodName         = "/authorization.v1.AuthorizationService/TransferResource"
+	AuthorizationService_UpdateResourceAssignment_FullMethodName = "/authorization.v1.AuthorizationService/UpdateResourceAssignment"
+	AuthorizationService_AddPermission_FullMethodName            = "/authorization.v1.AuthorizationService/AddPermission"
+	AuthorizationService_RemovePermission_FullMethodName         = "/authorization.v1.AuthorizationService/RemovePermission"
+	AuthorizationService_RequestResourceTransfer_FullMethodName  = "/authorization.v1.AuthorizationService/RequestResourceTransfer"
+	AuthorizationService_ArchiveResource_FullMethodName          = "/authorization.v1.AuthorizationService/ArchiveResource"
 )
 
 // AuthorizationServiceClient is the client API for AuthorizationService service.
@@ -39,7 +44,13 @@ type AuthorizationServiceClient interface {
 	GetTeams(ctx context.Context, in *GetTeamsRequest, opts ...grpc.CallOption) (*GetTeamsResponse, error)
 	AddResource(ctx context.Context, in *AddResourceRequest, opts ...grpc.CallOption) (*AddResourceResponse, error)
 	GetResources(ctx context.Context, in *GetResourcesRequest, opts ...grpc.CallOption) (*GetResourcesResponse, error)
-	GetActorResources(ctx context.Context, in *GetActorResourcesRequest, opts ...grpc.CallOption) (*GetActorResourcesResponse, error)
+	GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*GetResourceResponse, error)
+	TransferResource(ctx context.Context, in *TransferResourceRequest, opts ...grpc.CallOption) (*TransferResourceResponse, error)
+	UpdateResourceAssignment(ctx context.Context, in *UpdateResourceAssignmentRequest, opts ...grpc.CallOption) (*UpdateResourceAssignmentResponse, error)
+	AddPermission(ctx context.Context, in *AddPermissionRequest, opts ...grpc.CallOption) (*AddPermissionResponse, error)
+	RemovePermission(ctx context.Context, in *RemovePermissionRequest, opts ...grpc.CallOption) (*RemovePermissionResponse, error)
+	RequestResourceTransfer(ctx context.Context, in *RequestResourceTransferRequest, opts ...grpc.CallOption) (*RequestResourceTransferResponse, error)
+	// pending implementation
 	ArchiveResource(ctx context.Context, in *ArchiveResourceRequest, opts ...grpc.CallOption) (*ArchiveResourceResponse, error)
 }
 
@@ -111,10 +122,60 @@ func (c *authorizationServiceClient) GetResources(ctx context.Context, in *GetRe
 	return out, nil
 }
 
-func (c *authorizationServiceClient) GetActorResources(ctx context.Context, in *GetActorResourcesRequest, opts ...grpc.CallOption) (*GetActorResourcesResponse, error) {
+func (c *authorizationServiceClient) GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*GetResourceResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetActorResourcesResponse)
-	err := c.cc.Invoke(ctx, AuthorizationService_GetActorResources_FullMethodName, in, out, cOpts...)
+	out := new(GetResourceResponse)
+	err := c.cc.Invoke(ctx, AuthorizationService_GetResource_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authorizationServiceClient) TransferResource(ctx context.Context, in *TransferResourceRequest, opts ...grpc.CallOption) (*TransferResourceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TransferResourceResponse)
+	err := c.cc.Invoke(ctx, AuthorizationService_TransferResource_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authorizationServiceClient) UpdateResourceAssignment(ctx context.Context, in *UpdateResourceAssignmentRequest, opts ...grpc.CallOption) (*UpdateResourceAssignmentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateResourceAssignmentResponse)
+	err := c.cc.Invoke(ctx, AuthorizationService_UpdateResourceAssignment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authorizationServiceClient) AddPermission(ctx context.Context, in *AddPermissionRequest, opts ...grpc.CallOption) (*AddPermissionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddPermissionResponse)
+	err := c.cc.Invoke(ctx, AuthorizationService_AddPermission_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authorizationServiceClient) RemovePermission(ctx context.Context, in *RemovePermissionRequest, opts ...grpc.CallOption) (*RemovePermissionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemovePermissionResponse)
+	err := c.cc.Invoke(ctx, AuthorizationService_RemovePermission_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authorizationServiceClient) RequestResourceTransfer(ctx context.Context, in *RequestResourceTransferRequest, opts ...grpc.CallOption) (*RequestResourceTransferResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RequestResourceTransferResponse)
+	err := c.cc.Invoke(ctx, AuthorizationService_RequestResourceTransfer_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +202,13 @@ type AuthorizationServiceServer interface {
 	GetTeams(context.Context, *GetTeamsRequest) (*GetTeamsResponse, error)
 	AddResource(context.Context, *AddResourceRequest) (*AddResourceResponse, error)
 	GetResources(context.Context, *GetResourcesRequest) (*GetResourcesResponse, error)
-	GetActorResources(context.Context, *GetActorResourcesRequest) (*GetActorResourcesResponse, error)
+	GetResource(context.Context, *GetResourceRequest) (*GetResourceResponse, error)
+	TransferResource(context.Context, *TransferResourceRequest) (*TransferResourceResponse, error)
+	UpdateResourceAssignment(context.Context, *UpdateResourceAssignmentRequest) (*UpdateResourceAssignmentResponse, error)
+	AddPermission(context.Context, *AddPermissionRequest) (*AddPermissionResponse, error)
+	RemovePermission(context.Context, *RemovePermissionRequest) (*RemovePermissionResponse, error)
+	RequestResourceTransfer(context.Context, *RequestResourceTransferRequest) (*RequestResourceTransferResponse, error)
+	// pending implementation
 	ArchiveResource(context.Context, *ArchiveResourceRequest) (*ArchiveResourceResponse, error)
 	mustEmbedUnimplementedAuthorizationServiceServer()
 }
@@ -168,8 +235,23 @@ func (UnimplementedAuthorizationServiceServer) AddResource(context.Context, *Add
 func (UnimplementedAuthorizationServiceServer) GetResources(context.Context, *GetResourcesRequest) (*GetResourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResources not implemented")
 }
-func (UnimplementedAuthorizationServiceServer) GetActorResources(context.Context, *GetActorResourcesRequest) (*GetActorResourcesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetActorResources not implemented")
+func (UnimplementedAuthorizationServiceServer) GetResource(context.Context, *GetResourceRequest) (*GetResourceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetResource not implemented")
+}
+func (UnimplementedAuthorizationServiceServer) TransferResource(context.Context, *TransferResourceRequest) (*TransferResourceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TransferResource not implemented")
+}
+func (UnimplementedAuthorizationServiceServer) UpdateResourceAssignment(context.Context, *UpdateResourceAssignmentRequest) (*UpdateResourceAssignmentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateResourceAssignment not implemented")
+}
+func (UnimplementedAuthorizationServiceServer) AddPermission(context.Context, *AddPermissionRequest) (*AddPermissionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddPermission not implemented")
+}
+func (UnimplementedAuthorizationServiceServer) RemovePermission(context.Context, *RemovePermissionRequest) (*RemovePermissionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemovePermission not implemented")
+}
+func (UnimplementedAuthorizationServiceServer) RequestResourceTransfer(context.Context, *RequestResourceTransferRequest) (*RequestResourceTransferResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RequestResourceTransfer not implemented")
 }
 func (UnimplementedAuthorizationServiceServer) ArchiveResource(context.Context, *ArchiveResourceRequest) (*ArchiveResourceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ArchiveResource not implemented")
@@ -295,20 +377,110 @@ func _AuthorizationService_GetResources_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthorizationService_GetActorResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetActorResourcesRequest)
+func _AuthorizationService_GetResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetResourceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthorizationServiceServer).GetActorResources(ctx, in)
+		return srv.(AuthorizationServiceServer).GetResource(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthorizationService_GetActorResources_FullMethodName,
+		FullMethod: AuthorizationService_GetResource_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthorizationServiceServer).GetActorResources(ctx, req.(*GetActorResourcesRequest))
+		return srv.(AuthorizationServiceServer).GetResource(ctx, req.(*GetResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthorizationService_TransferResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TransferResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthorizationServiceServer).TransferResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthorizationService_TransferResource_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthorizationServiceServer).TransferResource(ctx, req.(*TransferResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthorizationService_UpdateResourceAssignment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateResourceAssignmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthorizationServiceServer).UpdateResourceAssignment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthorizationService_UpdateResourceAssignment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthorizationServiceServer).UpdateResourceAssignment(ctx, req.(*UpdateResourceAssignmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthorizationService_AddPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddPermissionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthorizationServiceServer).AddPermission(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthorizationService_AddPermission_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthorizationServiceServer).AddPermission(ctx, req.(*AddPermissionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthorizationService_RemovePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemovePermissionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthorizationServiceServer).RemovePermission(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthorizationService_RemovePermission_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthorizationServiceServer).RemovePermission(ctx, req.(*RemovePermissionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthorizationService_RequestResourceTransfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestResourceTransferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthorizationServiceServer).RequestResourceTransfer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthorizationService_RequestResourceTransfer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthorizationServiceServer).RequestResourceTransfer(ctx, req.(*RequestResourceTransferRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -363,8 +535,28 @@ var AuthorizationService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthorizationService_GetResources_Handler,
 		},
 		{
-			MethodName: "GetActorResources",
-			Handler:    _AuthorizationService_GetActorResources_Handler,
+			MethodName: "GetResource",
+			Handler:    _AuthorizationService_GetResource_Handler,
+		},
+		{
+			MethodName: "TransferResource",
+			Handler:    _AuthorizationService_TransferResource_Handler,
+		},
+		{
+			MethodName: "UpdateResourceAssignment",
+			Handler:    _AuthorizationService_UpdateResourceAssignment_Handler,
+		},
+		{
+			MethodName: "AddPermission",
+			Handler:    _AuthorizationService_AddPermission_Handler,
+		},
+		{
+			MethodName: "RemovePermission",
+			Handler:    _AuthorizationService_RemovePermission_Handler,
+		},
+		{
+			MethodName: "RequestResourceTransfer",
+			Handler:    _AuthorizationService_RequestResourceTransfer_Handler,
 		},
 		{
 			MethodName: "ArchiveResource",

@@ -31,6 +31,18 @@ func (repo *RepositoryImpl) GetAdmission(ctx context.Context, id uuid.UUID) (*mo
 	return &admission, nil
 }
 
+func (repo *RepositoryImpl) UpdateAdmission(ctx context.Context, admission *models.Admission) error {
+	return repo.db.WithContext(ctx).Model(&models.Admission{}).Where("id = ?", admission.ID).Updates(map[string]interface{}{
+		"start_time":  admission.StartTime,
+		"end_time":    admission.EndTime,
+		"status":      admission.Status,
+		"vitals":      admission.Vitals,
+		"diagnosis":   admission.Diagnosis,
+		"medications": admission.Medications,
+		"logs":        admission.Logs,
+	}).Error
+}
+
 func (repo *RepositoryImpl) DeleteAdmission(ctx context.Context, id uuid.UUID) error {
 	return repo.db.WithContext(ctx).Where("id = ?", id.String()).Delete(&models.Admission{}).Error
 }

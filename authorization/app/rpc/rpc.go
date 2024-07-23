@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"golang.org/x/exp/slog"
@@ -97,10 +98,21 @@ func (s *Service) GetTeams(_ context.Context, _ *authorization.GetTeamsRequest) 
 }
 
 func (s *Service) AddResource(_ context.Context, request *authorization.AddResourceRequest) (*authorization.AddResourceResponse, error) {
+	var pendingTransfer *resource.JourneyStep
+	if request.PendingTransfer != nil {
+		pendingTransfer = &resource.JourneyStep{
+			FromTeam:     request.PendingTransfer.FromTeam,
+			ToTeam:       request.PendingTransfer.ToTeam,
+			FromTeamLead: uuid.MustParse(request.PendingTransfer.FromTeamLead),
+			ToTeamLead:   uuid.MustParse(request.PendingTransfer.ToTeamLead),
+		}
+	}
+
 	if err := s.resourceService.AddResource(resource.Resource{
-		ID:       uuid.MustParse(request.Id),
-		Team:     request.Team,
-		TeamLead: uuid.MustParse(request.TeamLead),
+		ID:              uuid.MustParse(request.Id),
+		Team:            request.Team,
+		TeamLead:        uuid.MustParse(request.TeamLead),
+		PendingTransfer: pendingTransfer,
 	}); err != nil {
 		return nil, err
 	}
@@ -108,22 +120,44 @@ func (s *Service) AddResource(_ context.Context, request *authorization.AddResou
 	return &authorization.AddResourceResponse{}, nil
 }
 
-func (s *Service) GetResources(_ context.Context, request *authorization.GetResourcesRequest) (*authorization.GetResourcesResponse, error) {
-	resources, err := s.resourceService.GetResources(lo.Ternary(len(request.Ids) > 0, &request.Ids, nil))
+func (s *Service) GetResources(ctx context.Context, request *authorization.GetResourcesRequest) (*authorization.GetResourcesResponse, error) {
+	actorIdString := lo.FromPtrOr(request.ActorId, "")
+	var actorIdPtr *uuid.UUID
+	if actorIdString != "" {
+		actorId := uuid.MustParse(actorIdString)
+		actorIdPtr = &actorId
+	}
+
+	resources, err := s.resourceService.GetResources(
+		ctx,
+		lo.Ternary(len(request.Ids) > 0, &request.Ids, nil),
+		actorIdPtr,
+		request.Archived,
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	var result []*authorization.Resource
-	for _, resource := range resources {
-		teamResult, err := s.teamService.GetTeam(resource.Team)
+	for _, r := range resources {
+		teamResult, err := s.teamService.GetTeam(r.Team)
 		if err != nil {
-			slog.Error("Failed to get team ", resource.Team, err)
+			slog.Error("Failed to get team ", r.Team, err)
 			return nil, err
 		}
 
+		var pendingTransfer *authorization.JourneyStep
+		if r.PendingTransfer != nil {
+			pendingTransfer = &authorization.JourneyStep{
+				FromTeam:     r.PendingTransfer.FromTeam,
+				ToTeam:       r.PendingTransfer.ToTeam,
+				FromTeamLead: r.PendingTransfer.FromTeamLead.String(),
+				ToTeamLead:   r.PendingTransfer.ToTeamLead.String(),
+			}
+		}
+
 		result = append(result, &authorization.Resource{
-			Id: resource.ID.String(),
+			Id: r.ID.String(),
 			Team: &authorization.Team{
 				Name:        teamResult.Name,
 				DisplayName: teamResult.DisplayName,
@@ -136,7 +170,8 @@ func (s *Service) GetResources(_ context.Context, request *authorization.GetReso
 					}
 				}),
 			},
-			TeamLead: resource.TeamLead.String(),
+			TeamLead:        r.TeamLead.String(),
+			PendingTransfer: pendingTransfer,
 		})
 	}
 
@@ -145,8 +180,109 @@ func (s *Service) GetResources(_ context.Context, request *authorization.GetReso
 	}, nil
 }
 
-func (s *Service) ArchiveResource(_ context.Context, request *authorization.ArchiveResourceRequest) (*authorization.ArchiveResourceResponse, error) {
-	if err := s.resourceService.ArchiveResource(uuid.MustParse(request.Id)); err != nil {
+func (s *Service) GetResource(ctx context.Context, request *authorization.GetResourceRequest) (*authorization.GetResourceResponse, error) {
+	resourceResult, err := s.resourceService.GetResource(ctx, uuid.MustParse(request.Id))
+	if err != nil {
+		return nil, err
+	}
+
+	teamResult, err := s.teamService.GetTeam(resourceResult.Team)
+	if err != nil {
+		slog.Error("Failed to get team ", resourceResult.Team, err)
+		return nil, err
+	}
+
+	return &authorization.GetResourceResponse{
+		Resource: &authorization.Resource{
+			Id: resourceResult.ID.String(),
+			Team: &authorization.Team{
+				Name:        teamResult.Name,
+				DisplayName: teamResult.DisplayName,
+			},
+			TeamLead: resourceResult.TeamLead.String(),
+			Assignments: lo.Map(resourceResult.Assignments, func(a resource.Assignment, _ int) *authorization.Assignment {
+				return &authorization.Assignment{
+					ActorId:     a.ActorID.String(),
+					Role:        a.Role,
+					Permissions: a.Permissions,
+				}
+			}),
+			Journey: lo.Map(resourceResult.Journey, func(j resource.JourneyStep, _ int) *authorization.JourneyStep {
+				return &authorization.JourneyStep{
+					TransferTime: j.TransferTime,
+					FromTeam:     j.FromTeam,
+					ToTeam:       j.ToTeam,
+					FromTeamLead: j.FromTeamLead.String(),
+					ToTeamLead:   j.ToTeamLead.String(),
+				}
+			}),
+			PendingTransfer: nil,
+		},
+	}, nil
+}
+
+func (s *Service) TransferResource(ctx context.Context, request *authorization.TransferResourceRequest) (*authorization.TransferResourceResponse, error) {
+	resourceResult, err := s.resourceService.GetResource(ctx, uuid.MustParse(request.Id))
+	if err != nil {
+		slog.Error("Failed to get resource ", request.Id, err)
+		return nil, err
+	}
+
+	if resourceResult.PendingTransfer == nil {
+		return nil, fmt.Errorf("no pending transfer for resource %v", request.Id)
+	}
+
+	if resourceResult.PendingTransfer.ToTeamLead != uuid.MustParse(request.ActorId) {
+		return nil, fmt.Errorf("user %v is not authorized to accept transfer for resource %v", request.ActorId, request.Id)
+	}
+
+	if request.AcceptTransfer {
+		if err = s.resourceService.TransferResource(ctx, uuid.MustParse(request.Id)); err != nil {
+			return nil, err
+		}
+	} else {
+		if err = s.resourceService.DeclineTransfer(ctx, uuid.MustParse(request.Id)); err != nil {
+			return nil, err
+		}
+	}
+
+	return &authorization.TransferResourceResponse{}, nil
+}
+
+func (s *Service) UpdateResourceAssignment(ctx context.Context, request *authorization.UpdateResourceAssignmentRequest) (*authorization.UpdateResourceAssignmentResponse, error) {
+	if err := s.resourceService.UpdateResourceAssignment(ctx, uuid.MustParse(request.ActorId), uuid.MustParse(request.ResourceId), request.Add); err != nil {
+		return nil, err
+	}
+
+	return &authorization.UpdateResourceAssignmentResponse{}, nil
+}
+
+func (s *Service) AddPermission(ctx context.Context, request *authorization.AddPermissionRequest) (*authorization.AddPermissionResponse, error) {
+	if err := s.resourceService.AddPermission(ctx, uuid.MustParse(request.ActorId), uuid.MustParse(request.ResourceId), request.Section, request.Permission); err != nil {
+		return nil, err
+	}
+
+	return &authorization.AddPermissionResponse{}, nil
+}
+
+func (s *Service) RemovePermission(ctx context.Context, request *authorization.RemovePermissionRequest) (*authorization.RemovePermissionResponse, error) {
+	if err := s.resourceService.RemovePermission(ctx, uuid.MustParse(request.ActorId), uuid.MustParse(request.ResourceId), request.Section); err != nil {
+		return nil, err
+	}
+
+	return &authorization.RemovePermissionResponse{}, nil
+}
+
+func (s *Service) RequestResourceTransfer(ctx context.Context, request *authorization.RequestResourceTransferRequest) (*authorization.RequestResourceTransferResponse, error) {
+	if err := s.resourceService.RequestResourceTransfer(ctx, uuid.MustParse(request.ResourceId), request.ToTeam, uuid.MustParse(request.ToTeamLead)); err != nil {
+		return nil, err
+	}
+
+	return &authorization.RequestResourceTransferResponse{}, nil
+}
+
+func (s *Service) ArchiveResource(ctx context.Context, request *authorization.ArchiveResourceRequest) (*authorization.ArchiveResourceResponse, error) {
+	if err := s.resourceService.ArchiveResource(ctx, uuid.MustParse(request.Id)); err != nil {
 		return nil, err
 	}
 

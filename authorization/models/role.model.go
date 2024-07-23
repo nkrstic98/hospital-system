@@ -10,11 +10,12 @@ type Section string
 type Permission string
 
 const (
-	Section_Employees Section = "EMPLOYEES"
-	Section_Intake    Section = "INTAKE"
-	Section_Patients  Section = "PATIENTS"
-	Section_Labs      Section = "LABS"
-	Section_Imaging   Section = "IMAGING"
+	Section_Employees  Section = "EMPLOYEES"
+	Section_Intake     Section = "INTAKE"
+	Section_Admissions Section = "ADMISSIONS"
+	Section_Patients   Section = "PATIENTS"
+	Section_Labs       Section = "LABS"
+	Section_Imaging    Section = "IMAGING"
 
 	Section_PatientsHistory   Section = "PATIENTS:HISTORY"
 	Section_PatientsInfo      Section = "PATIENTS:INFO"
@@ -29,6 +30,9 @@ const (
 
 	Section_PatientsLabsOrder  Section = "PATIENTS:LABS:ORDER"
 	Section_PatientsLabsResult Section = "PATIENTS:LABS:RESULT"
+
+	Section_PatientsLogs Section = "PATIENTS:LOGS"
+	Section_PatientTeam  Section = "PATIENTS:TEAM"
 
 	Section_PatientsImagingOrder  Section = "PATIENTS:IMAGING:ORDER"
 	Section_PatientsImagingResult Section = "PATIENTS:IMAGING:RESULT"

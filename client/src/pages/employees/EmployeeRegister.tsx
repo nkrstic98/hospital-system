@@ -81,7 +81,8 @@ const teams: Map<string, string> = new Map([
     ["ONCOLOGY", "Oncology"],
     ["PSYCH", "Psychiatry"],
     ["UROLOGY", "Urology"],
-    ["ER", "Emergency Medicine"]
+    ["ER", "Emergency Medicine"],
+    ["LAB", "Laboratory"],
 ]);
 
 const EmployeeRegister = ()=> {

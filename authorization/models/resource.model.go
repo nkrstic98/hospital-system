@@ -12,5 +12,6 @@ type Resource struct {
 	TeamLead        uuid.UUID       `gorm:"type:uuid;not null"`
 	TeamAssignments json.RawMessage `gorm:"not null;type:jsonb"`
 	Journey         json.RawMessage `gorm:"default:null;type:jsonb"`
+	PendingTransfer json.RawMessage `gorm:"default:null;type:jsonb"`
 	Archived        sql.NullBool    `gorm:"default:null"`
 }
